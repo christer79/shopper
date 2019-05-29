@@ -1,0 +1,82 @@
+type Item {
+  id: ID!
+  name: String!
+  amount: Float
+  unit: String
+  section: String
+  checked: Boolean
+  deleted: Boolean
+  position: Int
+}
+
+type Section {
+  id: ID!
+  name: String!
+  position: Int!
+}
+
+type Suggestion {
+  name: String!
+  unit: String!
+  section: String!
+}
+
+type Table {
+  sections: [Section!]
+  items: [Item!]
+}
+
+type TableMap {
+  name: String!
+  id: ID!
+}
+
+type Query {
+  table(id: ID!): Table!
+  tables: [TableMap]
+  suggestions: [Suggestion!]
+}
+
+input NewItem {
+  id: ID!
+  name: String!
+  amount: Float
+  unit: String
+  section: String
+  checked: Boolean
+  deleted: Boolean
+  position: Int
+  table: ID!
+}
+
+input NewSection {
+  id: ID!
+  name: String!
+  position: Int!
+  table: ID!
+}
+
+input NewTableMap {
+  name: String!
+  id: ID!
+}
+type Mutation {
+  createTable(input: NewTableMap): TableMap
+  deleteTabel(id: ID!): TableMap
+  createItem(input: NewItem): Item
+  updateItem(input: NewItem!): Item
+  deleteItem(id: ID!): Item
+  createSection(input: NewSection): Section
+  updateSection(input: NewSection): Section
+  deleteSection(id: ID!): Section
+}
+
+input SubscritionInput {
+  id: ID!
+  table: ID!
+}
+
+type Subscription {
+  itemChanged(input: SubscritionInput!): Item!
+  sectionChanged(input: SubscritionInput!): Section!
+}
