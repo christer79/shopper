@@ -21,19 +21,15 @@ type Suggestion {
   section: String!
 }
 
-type Table {
+type List {
+  name: String!
+  id: ID!
   sections: [Section!]
   items: [Item!]
 }
 
-type TableMap {
-  name: String!
-  id: ID!
-}
-
 type Query {
-  table(id: ID!): Table!
-  tables: [TableMap]
+  tables: [List!]
   suggestions: [Suggestion!]
 }
 
@@ -56,13 +52,14 @@ input NewSection {
   table: ID!
 }
 
-input NewTableMap {
+input NewList {
   name: String!
   id: ID!
 }
+
 type Mutation {
-  createTable(input: NewTableMap): TableMap
-  deleteTabel(id: ID!): TableMap
+  createList(input: NewList): List
+  deleteList(id: ID!): List
   createItem(input: NewItem): Item
   updateItem(input: NewItem!): Item
   deleteItem(id: ID!): Item

@@ -9,7 +9,6 @@ import (
 	"io"
 	"strconv"
 	"sync"
-	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -55,20 +54,26 @@ type ComplexityRoot struct {
 		Unit     func(childComplexity int) int
 	}
 
+	List struct {
+		ID       func(childComplexity int) int
+		Items    func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Sections func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateItem    func(childComplexity int, input *NewItem) int
+		CreateList    func(childComplexity int, input *NewList) int
 		CreateSection func(childComplexity int, input *NewSection) int
-		CreateTable   func(childComplexity int, input *NewTableMap) int
 		DeleteItem    func(childComplexity int, id string) int
+		DeleteList    func(childComplexity int, id string) int
 		DeleteSection func(childComplexity int, id string) int
-		DeleteTabel   func(childComplexity int, id string) int
 		UpdateItem    func(childComplexity int, input NewItem) int
 		UpdateSection func(childComplexity int, input *NewSection) int
 	}
 
 	Query struct {
 		Suggestions func(childComplexity int) int
-		Table       func(childComplexity int, id string) int
 		Tables      func(childComplexity int) int
 	}
 
@@ -88,21 +93,11 @@ type ComplexityRoot struct {
 		Section func(childComplexity int) int
 		Unit    func(childComplexity int) int
 	}
-
-	Table struct {
-		Items    func(childComplexity int) int
-		Sections func(childComplexity int) int
-	}
-
-	TableMap struct {
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
-	}
 }
 
 type MutationResolver interface {
-	CreateTable(ctx context.Context, input *NewTableMap) (*TableMap, error)
-	DeleteTabel(ctx context.Context, id string) (*TableMap, error)
+	CreateList(ctx context.Context, input *NewList) (*List, error)
+	DeleteList(ctx context.Context, id string) (*List, error)
 	CreateItem(ctx context.Context, input *NewItem) (*Item, error)
 	UpdateItem(ctx context.Context, input NewItem) (*Item, error)
 	DeleteItem(ctx context.Context, id string) (*Item, error)
@@ -111,8 +106,7 @@ type MutationResolver interface {
 	DeleteSection(ctx context.Context, id string) (*Section, error)
 }
 type QueryResolver interface {
-	Table(ctx context.Context, id string) (*Table, error)
-	Tables(ctx context.Context) ([]*TableMap, error)
+	Tables(ctx context.Context) ([]*List, error)
 	Suggestions(ctx context.Context) ([]*Suggestion, error)
 }
 type SubscriptionResolver interface {
@@ -191,6 +185,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Item.Unit(childComplexity), true
 
+	case "List.id":
+		if e.complexity.List.ID == nil {
+			break
+		}
+
+		return e.complexity.List.ID(childComplexity), true
+
+	case "List.items":
+		if e.complexity.List.Items == nil {
+			break
+		}
+
+		return e.complexity.List.Items(childComplexity), true
+
+	case "List.name":
+		if e.complexity.List.Name == nil {
+			break
+		}
+
+		return e.complexity.List.Name(childComplexity), true
+
+	case "List.sections":
+		if e.complexity.List.Sections == nil {
+			break
+		}
+
+		return e.complexity.List.Sections(childComplexity), true
+
 	case "Mutation.createItem":
 		if e.complexity.Mutation.CreateItem == nil {
 			break
@@ -202,6 +224,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateItem(childComplexity, args["input"].(*NewItem)), true
+
+	case "Mutation.createList":
+		if e.complexity.Mutation.CreateList == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateList(childComplexity, args["input"].(*NewList)), true
 
 	case "Mutation.createSection":
 		if e.complexity.Mutation.CreateSection == nil {
@@ -215,18 +249,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateSection(childComplexity, args["input"].(*NewSection)), true
 
-	case "Mutation.createTable":
-		if e.complexity.Mutation.CreateTable == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createTable_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateTable(childComplexity, args["input"].(*NewTableMap)), true
-
 	case "Mutation.deleteItem":
 		if e.complexity.Mutation.DeleteItem == nil {
 			break
@@ -239,6 +261,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteItem(childComplexity, args["id"].(string)), true
 
+	case "Mutation.deleteList":
+		if e.complexity.Mutation.DeleteList == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteList(childComplexity, args["id"].(string)), true
+
 	case "Mutation.deleteSection":
 		if e.complexity.Mutation.DeleteSection == nil {
 			break
@@ -250,18 +284,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteSection(childComplexity, args["id"].(string)), true
-
-	case "Mutation.deleteTabel":
-		if e.complexity.Mutation.DeleteTabel == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteTabel_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteTabel(childComplexity, args["id"].(string)), true
 
 	case "Mutation.updateItem":
 		if e.complexity.Mutation.UpdateItem == nil {
@@ -293,18 +315,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Suggestions(childComplexity), true
-
-	case "Query.table":
-		if e.complexity.Query.Table == nil {
-			break
-		}
-
-		args, err := ec.field_Query_table_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Table(childComplexity, args["id"].(string)), true
 
 	case "Query.tables":
 		if e.complexity.Query.Tables == nil {
@@ -378,34 +388,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Suggestion.Unit(childComplexity), true
-
-	case "Table.items":
-		if e.complexity.Table.Items == nil {
-			break
-		}
-
-		return e.complexity.Table.Items(childComplexity), true
-
-	case "Table.sections":
-		if e.complexity.Table.Sections == nil {
-			break
-		}
-
-		return e.complexity.Table.Sections(childComplexity), true
-
-	case "TableMap.id":
-		if e.complexity.TableMap.ID == nil {
-			break
-		}
-
-		return e.complexity.TableMap.ID(childComplexity), true
-
-	case "TableMap.name":
-		if e.complexity.TableMap.Name == nil {
-			break
-		}
-
-		return e.complexity.TableMap.Name(childComplexity), true
 
 	}
 	return 0, false
@@ -536,19 +518,15 @@ type Suggestion {
   section: String!
 }
 
-type Table {
+type List {
+  name: String!
+  id: ID!
   sections: [Section!]
   items: [Item!]
 }
 
-type TableMap {
-  name: String!
-  id: ID!
-}
-
 type Query {
-  table(id: ID!): Table!
-  tables: [TableMap]
+  tables: [List!]
   suggestions: [Suggestion!]
 }
 
@@ -571,13 +549,14 @@ input NewSection {
   table: ID!
 }
 
-input NewTableMap {
+input NewList {
   name: String!
   id: ID!
 }
+
 type Mutation {
-  createTable(input: NewTableMap): TableMap
-  deleteTabel(id: ID!): TableMap
+  createList(input: NewList): List
+  deleteList(id: ID!): List
   createItem(input: NewItem): Item
   updateItem(input: NewItem!): Item
   deleteItem(id: ID!): Item
@@ -616,12 +595,12 @@ func (ec *executionContext) field_Mutation_createItem_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createSection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *NewSection
+	var arg0 *NewList
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalONewSection2ᚖappᚐNewSection(ctx, tmp)
+		arg0, err = ec.unmarshalONewList2ᚖappᚐNewList(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -630,12 +609,12 @@ func (ec *executionContext) field_Mutation_createSection_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createTable_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createSection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *NewTableMap
+	var arg0 *NewSection
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalONewTableMap2ᚖappᚐNewTableMap(ctx, tmp)
+		arg0, err = ec.unmarshalONewSection2ᚖappᚐNewSection(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -658,7 +637,7 @@ func (ec *executionContext) field_Mutation_deleteItem_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deleteSection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_deleteList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -672,7 +651,7 @@ func (ec *executionContext) field_Mutation_deleteSection_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deleteTabel_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_deleteSection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -725,20 +704,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_table_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
 	return args, nil
 }
 
@@ -1000,38 +965,109 @@ func (ec *executionContext) _Item_position(ctx context.Context, field graphql.Co
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createTable(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _List_name(ctx context.Context, field graphql.CollectedField, obj *List) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object:   "Mutation",
+		Object:   "List",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createTable_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateTable(rctx, args["input"].(*NewTableMap))
+		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*TableMap)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOTableMap2ᚖappᚐTableMap(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_deleteTabel(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _List_id(ctx context.Context, field graphql.CollectedField, obj *List) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "List",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _List_sections(ctx context.Context, field graphql.CollectedField, obj *List) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "List",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Sections, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Section)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOSection2ᚕᚖappᚐSection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _List_items(ctx context.Context, field graphql.CollectedField, obj *List) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "List",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Items, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Item)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOItem2ᚕᚖappᚐItem(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createList(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -1042,7 +1078,7 @@ func (ec *executionContext) _Mutation_deleteTabel(ctx context.Context, field gra
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteTabel_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_createList_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1051,15 +1087,46 @@ func (ec *executionContext) _Mutation_deleteTabel(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteTabel(rctx, args["id"].(string))
+		return ec.resolvers.Mutation().CreateList(rctx, args["input"].(*NewList))
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*TableMap)
+	res := resTmp.(*List)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOTableMap2ᚖappᚐTableMap(ctx, field.Selections, res)
+	return ec.marshalOList2ᚖappᚐList(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteList(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteList(rctx, args["id"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*List)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOList2ᚖappᚐList(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createItem(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -1248,40 +1315,6 @@ func (ec *executionContext) _Mutation_deleteSection(ctx context.Context, field g
 	return ec.marshalOSection2ᚖappᚐSection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_table(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_table_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Table(rctx, args["id"].(string))
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*Table)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNTable2ᚖappᚐTable(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_tables(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -1300,10 +1333,10 @@ func (ec *executionContext) _Query_tables(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*TableMap)
+	res := resTmp.([]*List)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOTableMap2ᚕᚖappᚐTableMap(ctx, field.Selections, res)
+	return ec.marshalOList2ᚕᚖappᚐList(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_suggestions(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -1613,108 +1646,6 @@ func (ec *executionContext) _Suggestion_section(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Table_sections(ctx context.Context, field graphql.CollectedField, obj *Table) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object:   "Table",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Sections, nil
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*Section)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOSection2ᚕᚖappᚐSection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Table_items(ctx context.Context, field graphql.CollectedField, obj *Table) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object:   "Table",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Items, nil
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*Item)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOItem2ᚕᚖappᚐItem(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _TableMap_name(ctx context.Context, field graphql.CollectedField, obj *TableMap) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object:   "TableMap",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _TableMap_id(ctx context.Context, field graphql.CollectedField, obj *TableMap) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object:   "TableMap",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
@@ -2614,6 +2545,30 @@ func (ec *executionContext) unmarshalInputNewItem(ctx context.Context, v interfa
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewList(ctx context.Context, v interface{}) (NewList, error) {
+	var it NewList
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewSection(ctx context.Context, v interface{}) (NewSection, error) {
 	var it NewSection
 	var asMap = v.(map[string]interface{})
@@ -2641,30 +2596,6 @@ func (ec *executionContext) unmarshalInputNewSection(ctx context.Context, v inte
 		case "table":
 			var err error
 			it.Table, err = ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputNewTableMap(ctx context.Context, v interface{}) (NewTableMap, error) {
-	var it NewTableMap
-	var asMap = v.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "name":
-			var err error
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "id":
-			var err error
-			it.ID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2750,6 +2681,42 @@ func (ec *executionContext) _Item(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var listImplementors = []string{"List"}
+
+func (ec *executionContext) _List(ctx context.Context, sel ast.SelectionSet, obj *List) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, listImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("List")
+		case "name":
+			out.Values[i] = ec._List_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "id":
+			out.Values[i] = ec._List_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "sections":
+			out.Values[i] = ec._List_sections(ctx, field, obj)
+		case "items":
+			out.Values[i] = ec._List_items(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2765,10 +2732,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "createTable":
-			out.Values[i] = ec._Mutation_createTable(ctx, field)
-		case "deleteTabel":
-			out.Values[i] = ec._Mutation_deleteTabel(ctx, field)
+		case "createList":
+			out.Values[i] = ec._Mutation_createList(ctx, field)
+		case "deleteList":
+			out.Values[i] = ec._Mutation_deleteList(ctx, field)
 		case "createItem":
 			out.Values[i] = ec._Mutation_createItem(ctx, field)
 		case "updateItem":
@@ -2807,20 +2774,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "table":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_table(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "tables":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -2940,64 +2893,6 @@ func (ec *executionContext) _Suggestion(ctx context.Context, sel ast.SelectionSe
 			}
 		case "section":
 			out.Values[i] = ec._Suggestion_section(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var tableImplementors = []string{"Table"}
-
-func (ec *executionContext) _Table(ctx context.Context, sel ast.SelectionSet, obj *Table) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, tableImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Table")
-		case "sections":
-			out.Values[i] = ec._Table_sections(ctx, field, obj)
-		case "items":
-			out.Values[i] = ec._Table_items(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var tableMapImplementors = []string{"TableMap"}
-
-func (ec *executionContext) _TableMap(ctx context.Context, sel ast.SelectionSet, obj *TableMap) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, tableMapImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("TableMap")
-		case "name":
-			out.Values[i] = ec._TableMap_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "id":
-			out.Values[i] = ec._TableMap_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3313,6 +3208,20 @@ func (ec *executionContext) marshalNItem2ᚖappᚐItem(ctx context.Context, sel 
 	return ec._Item(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNList2appᚐList(ctx context.Context, sel ast.SelectionSet, v List) graphql.Marshaler {
+	return ec._List(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNList2ᚖappᚐList(ctx context.Context, sel ast.SelectionSet, v *List) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._List(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNNewItem2appᚐNewItem(ctx context.Context, v interface{}) (NewItem, error) {
 	return ec.unmarshalInputNewItem(ctx, v)
 }
@@ -3361,20 +3270,6 @@ func (ec *executionContext) marshalNSuggestion2ᚖappᚐSuggestion(ctx context.C
 		return graphql.Null
 	}
 	return ec._Suggestion(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNTable2appᚐTable(ctx context.Context, sel ast.SelectionSet, v Table) graphql.Marshaler {
-	return ec._Table(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNTable2ᚖappᚐTable(ctx context.Context, sel ast.SelectionSet, v *Table) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Table(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -3723,6 +3618,57 @@ func (ec *executionContext) marshalOItem2ᚖappᚐItem(ctx context.Context, sel 
 	return ec._Item(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOList2appᚐList(ctx context.Context, sel ast.SelectionSet, v List) graphql.Marshaler {
+	return ec._List(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOList2ᚕᚖappᚐList(ctx context.Context, sel ast.SelectionSet, v []*List) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNList2ᚖappᚐList(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOList2ᚖappᚐList(ctx context.Context, sel ast.SelectionSet, v *List) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._List(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalONewItem2appᚐNewItem(ctx context.Context, v interface{}) (NewItem, error) {
 	return ec.unmarshalInputNewItem(ctx, v)
 }
@@ -3735,6 +3681,18 @@ func (ec *executionContext) unmarshalONewItem2ᚖappᚐNewItem(ctx context.Conte
 	return &res, err
 }
 
+func (ec *executionContext) unmarshalONewList2appᚐNewList(ctx context.Context, v interface{}) (NewList, error) {
+	return ec.unmarshalInputNewList(ctx, v)
+}
+
+func (ec *executionContext) unmarshalONewList2ᚖappᚐNewList(ctx context.Context, v interface{}) (*NewList, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalONewList2appᚐNewList(ctx, v)
+	return &res, err
+}
+
 func (ec *executionContext) unmarshalONewSection2appᚐNewSection(ctx context.Context, v interface{}) (NewSection, error) {
 	return ec.unmarshalInputNewSection(ctx, v)
 }
@@ -3744,18 +3702,6 @@ func (ec *executionContext) unmarshalONewSection2ᚖappᚐNewSection(ctx context
 		return nil, nil
 	}
 	res, err := ec.unmarshalONewSection2appᚐNewSection(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) unmarshalONewTableMap2appᚐNewTableMap(ctx context.Context, v interface{}) (NewTableMap, error) {
-	return ec.unmarshalInputNewTableMap(ctx, v)
-}
-
-func (ec *executionContext) unmarshalONewTableMap2ᚖappᚐNewTableMap(ctx context.Context, v interface{}) (*NewTableMap, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalONewTableMap2appᚐNewTableMap(ctx, v)
 	return &res, err
 }
 
@@ -3871,57 +3817,6 @@ func (ec *executionContext) marshalOSuggestion2ᚕᚖappᚐSuggestion(ctx contex
 	}
 	wg.Wait()
 	return ret
-}
-
-func (ec *executionContext) marshalOTableMap2appᚐTableMap(ctx context.Context, sel ast.SelectionSet, v TableMap) graphql.Marshaler {
-	return ec._TableMap(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOTableMap2ᚕᚖappᚐTableMap(ctx context.Context, sel ast.SelectionSet, v []*TableMap) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		rctx := &graphql.ResolverContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOTableMap2ᚖappᚐTableMap(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalOTableMap2ᚖappᚐTableMap(ctx context.Context, sel ast.SelectionSet, v *TableMap) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._TableMap(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

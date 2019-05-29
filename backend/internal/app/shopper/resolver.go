@@ -18,10 +18,10 @@ func (r *Resolver) Subscription() SubscriptionResolver {
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) CreateTable(ctx context.Context, input *NewTableMap) (*TableMap, error) {
+func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*List, error) {
 	panic("not implemented")
 }
-func (r *mutationResolver) DeleteTabel(ctx context.Context, id string) (*TableMap, error) {
+func (r *mutationResolver) DeleteList(ctx context.Context, id string) (*List, error) {
 	panic("not implemented")
 }
 func (r *mutationResolver) CreateItem(ctx context.Context, input *NewItem) (*Item, error) {
@@ -45,10 +45,7 @@ func (r *mutationResolver) DeleteSection(ctx context.Context, id string) (*Secti
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Table(ctx context.Context, id string) (*Table, error) {
-	panic("not implemented")
-}
-func (r *queryResolver) Tables(ctx context.Context) ([]*TableMap, error) {
+func (r *queryResolver) Tables(ctx context.Context) ([]*List, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) Suggestions(ctx context.Context) ([]*Suggestion, error) {

@@ -13,6 +13,13 @@ type Item struct {
 	Position *int     `json:"position"`
 }
 
+type List struct {
+	Name     string     `json:"name"`
+	ID       string     `json:"id"`
+	Sections []*Section `json:"sections"`
+	Items    []*Item    `json:"items"`
+}
+
 type NewItem struct {
 	ID       string   `json:"id"`
 	Name     string   `json:"name"`
@@ -25,16 +32,16 @@ type NewItem struct {
 	Table    string   `json:"table"`
 }
 
+type NewList struct {
+	Name string `json:"name"`
+	ID   string `json:"id"`
+}
+
 type NewSection struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Position int    `json:"position"`
 	Table    string `json:"table"`
-}
-
-type NewTableMap struct {
-	Name string `json:"name"`
-	ID   string `json:"id"`
 }
 
 type Section struct {
@@ -52,14 +59,4 @@ type Suggestion struct {
 	Name    string `json:"name"`
 	Unit    string `json:"unit"`
 	Section string `json:"section"`
-}
-
-type Table struct {
-	Sections []*Section `json:"sections"`
-	Items    []*Item    `json:"items"`
-}
-
-type TableMap struct {
-	Name string `json:"name"`
-	ID   string `json:"id"`
 }
