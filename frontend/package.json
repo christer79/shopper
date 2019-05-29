@@ -1,11 +1,29 @@
 {
-  "name": "frontend",
+  "name": "react-tutorial",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@react-firebase/auth": "^0.2.9",
+    "babel": "^6.23.0",
+    "firebase": "^6.0.4",
     "react": "^16.8.6",
+    "react-beautiful-dnd": "^11.0.2",
+    "react-clipboard.js": "^2.0.7",
     "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1"
+    "react-dropdown-input": "^0.1.11",
+    "react-firebaseui": "^3.1.2",
+    "react-redux": "^7.0.3",
+    "react-scripts": "3.0.0",
+    "react-select": "^2.4.3",
+    "redux": "^4.0.1",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-persist": "^5.10.0",
+    "sockjs-client": "^1.3.0",
+    "styled": "^1.0.0",
+    "styled-components": "^4.2.0",
+    "typescript": "^3.4.5",
+    "webpack": "4.29.6",
+    "webpack-cli": "^3.3.2"
   },
   "scripts": {
     "start": "react-scripts start",
