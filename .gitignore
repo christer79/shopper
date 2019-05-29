@@ -1,0 +1,3 @@
+*node_modules
+.atomenv.json
+.generated_code
