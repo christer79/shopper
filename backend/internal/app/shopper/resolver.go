@@ -2,9 +2,12 @@ package app
 
 import (
 	"context"
+	"database/sql"
+	"log"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
-
-type Resolver struct{}
+type Resolver struct {
+	DB *sql.DB
+}
 
 func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
@@ -19,7 +22,15 @@ func (r *Resolver) Subscription() SubscriptionResolver {
 type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*List, error) {
-	panic("not implemented")
+	sqstm, err := r.DB.Prepare("INSERT INTO lists(list_id,list_name) VALUES($1,$2) RETURNING id")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = sqstm.Exec(input.ID, input.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &List{Name: input.Name, ID: input.ID, Sections: []*Section{}, Items: []*Item{}}, nil
 }
 func (r *mutationResolver) DeleteList(ctx context.Context, id string) (*List, error) {
 	panic("not implemented")
