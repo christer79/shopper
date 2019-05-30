@@ -33,3 +33,10 @@ Generated with create-react-app
         items { id, name }
       }
     }
+
+
+    query GetLists {
+      lists {
+        name, id
+      }
+    }
