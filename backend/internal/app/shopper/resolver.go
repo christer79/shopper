@@ -56,7 +56,7 @@ func (r *mutationResolver) DeleteSection(ctx context.Context, id string) (*Secti
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Tables(ctx context.Context) ([]*List, error) {
+func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) Suggestions(ctx context.Context) ([]*Suggestion, error) {

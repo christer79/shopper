@@ -73,8 +73,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Lists       func(childComplexity int) int
 		Suggestions func(childComplexity int) int
-		Tables      func(childComplexity int) int
 	}
 
 	Section struct {
@@ -106,7 +106,7 @@ type MutationResolver interface {
 	DeleteSection(ctx context.Context, id string) (*Section, error)
 }
 type QueryResolver interface {
-	Tables(ctx context.Context) ([]*List, error)
+	Lists(ctx context.Context) ([]*List, error)
 	Suggestions(ctx context.Context) ([]*Suggestion, error)
 }
 type SubscriptionResolver interface {
@@ -309,19 +309,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateSection(childComplexity, args["input"].(*NewSection)), true
 
+	case "Query.lists":
+		if e.complexity.Query.Lists == nil {
+			break
+		}
+
+		return e.complexity.Query.Lists(childComplexity), true
+
 	case "Query.suggestions":
 		if e.complexity.Query.Suggestions == nil {
 			break
 		}
 
 		return e.complexity.Query.Suggestions(childComplexity), true
-
-	case "Query.tables":
-		if e.complexity.Query.Tables == nil {
-			break
-		}
-
-		return e.complexity.Query.Tables(childComplexity), true
 
 	case "Section.id":
 		if e.complexity.Section.ID == nil {
@@ -526,7 +526,7 @@ type List {
 }
 
 type Query {
-  tables: [List!]
+  lists: [List!]
   suggestions: [Suggestion!]
 }
 
@@ -1315,7 +1315,7 @@ func (ec *executionContext) _Mutation_deleteSection(ctx context.Context, field g
 	return ec.marshalOSection2ᚖappᚐSection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_tables(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Query_lists(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -1328,7 +1328,7 @@ func (ec *executionContext) _Query_tables(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Tables(rctx)
+		return ec.resolvers.Query().Lists(rctx)
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -2774,7 +2774,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "tables":
+		case "lists":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2782,7 +2782,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_tables(ctx, field)
+				res = ec._Query_lists(ctx, field)
 				return res
 			})
 		case "suggestions":
