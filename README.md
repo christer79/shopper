@@ -21,6 +21,9 @@ Generated with golang gqlgen script from schema.
 
 Generated with create-react-app
 
+export REACT_APP_MOMENTS_GRAPHQL_HTTP_URL="http://localhost:3500/graphql"
+export REACT_APP_MOMENTS_GRAPHQL_WEBSOCKET_URL="ws://localhost:3500/graphql"
+
 ## Docker
 
 ## Playground
@@ -37,6 +40,13 @@ Generated with create-react-app
 
     query GetLists {
       lists {
-        name, id
+        id
+      }
+    }
+
+
+    mutation DELETELIST {
+      deleteList(id: "kmdsl") {
+        id
       }
     }
