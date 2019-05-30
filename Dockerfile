@@ -27,9 +27,9 @@ ENTRYPOINT /shopper
 # ------------------------------------------------------------------------------
 FROM node:8.16 as frontend-build
 WORKDIR /usr/src/app
-COPY frontend/package.json frontend/yarn.lock ./
+COPY frontend/package.json ./
 RUN yarn
-COPY frontend/src/* ./src/
+COPY frontend/src ./src/
 COPY frontend/public/* ./public/
 RUN yarn install
 RUN yarn build
