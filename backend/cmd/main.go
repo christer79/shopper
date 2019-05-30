@@ -7,27 +7,16 @@ import (
 	"os"
 
 	"github.com/christer79/shopper/backend/internal/app/shopper"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 
 	"github.com/99designs/gqlgen/handler"
-
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
 )
 
-const defaultPort = "3500"
-
-const (
-	host         = "localhost"
-	port         = 5432
-	user         = "postgres"
-	password     = "docker"
-	dbname       = "shopping"
-	initializeDB = false
-)
+const defaultPort = "8080"
 
 func main() {
-
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Error opening database: %q", err)
@@ -42,11 +31,13 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+
 	r := mux.NewRouter()
-	r.HandleFunc("/", handler.Playground("GraphQL playground", "/graphql")).Methods("GET")
-	r.HandleFunc("/graphql", handler.GraphQL(app.NewExecutableSchema(app.Config{Resolvers: &app.Resolver{DB: db}}))).Methods("GET")
+	r.HandleFunc("/playground", handler.Playground("GraphQL playground", "/graphql")).Methods("GET")
+	r.HandleFunc("/graphql", handler.GraphQL(app.NewExecutableSchema(app.Config{Resolvers: &app.Resolver{DB: db}}))).Methods("GET", "POST")
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("build/static"))))
-	r.PathPrefix("/web").Handler(http.StripPrefix("/", http.FileServer(http.Dir("build"))))
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("build"))))
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
+
 }
