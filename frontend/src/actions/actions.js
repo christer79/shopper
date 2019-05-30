@@ -15,8 +15,16 @@ const SET_ITEMS = "SET_ITEMS";
 const ADD_ITEM = "ADD_ITEM";
 const ITEM_SYNCED = "ITEM_SYNCED";
 const TOGGLE_SHOW_EMPTY_LISTS = "TOGGLE_SHOW_EMPTY_LISTS";
-const SET_ITEM_SUGGESTIONS = "SET_ITEM_SUGGESTIONS";
 
+const SET_LIST_NAME = "SET_LIST_NAME";
+export function setListName(id) {
+  return {
+    type: SET_LIST_NAME,
+    payload: { id: id }
+  };
+}
+
+const SET_ITEM_SUGGESTIONS = "SET_ITEM_SUGGESTIONS";
 export function setItemSuggestions(itemSuggestions) {
   return {
     type: SET_ITEM_SUGGESTIONS,

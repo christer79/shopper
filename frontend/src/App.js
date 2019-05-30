@@ -7,6 +7,7 @@ import Menu from "./Menu";
 import EditItemForm from "./EditItemForm";
 import { DragDropContext } from "react-beautiful-dnd";
 import SignInScreen from "./components/firebasesignin";
+import ListSelector from "./components/listselector";
 import styled from "styled-components";
 import "firebase/auth";
 
@@ -30,6 +31,7 @@ const Container = styled.div`
 
 function mapStateToProps(state) {
   return {
+    selectedList: state.selectedList,
     sections: state.sections,
     items: state.items,
     editItemModalShowing: state.editItemModal.Showing,
@@ -169,6 +171,9 @@ class App extends Component {
 
         <IfFirebaseAuthed>
           {() => {
+            if (this.props.selectedList === "") {
+              return <ListSelector />;
+            }
             return (
               <div>
                 {this.props.editItemModalShowing ? (

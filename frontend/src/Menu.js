@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { toggleShowEmptyLists } from "./actions/actions";
+import { toggleShowEmptyLists, setListName } from "./actions/actions";
 import { connect } from "react-redux";
 import Clipboarder from "./components/clipboard";
 
@@ -13,7 +13,7 @@ const Container = styled.div`
   align-items: box-start;
 `;
 
-const mapDispatchToProps = { toggleShowEmptyLists };
+const mapDispatchToProps = { toggleShowEmptyLists, setListName };
 
 class Menu extends React.Component {
   render() {
@@ -28,6 +28,7 @@ class Menu extends React.Component {
         >
           Sign Out
         </button>
+        <button onClick={() => this.props.setListName("")}> CL </button>
       </Container>
     );
   }

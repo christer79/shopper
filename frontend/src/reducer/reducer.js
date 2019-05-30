@@ -1,4 +1,5 @@
 const initialState = {
+  selectedList: "",
   sections: {
     list: [], // list element:{ title: "", id: ""}
     section_order: [],
@@ -26,6 +27,10 @@ function reducer(state = initialState, action) {
   var newSections;
   var newItems;
   switch (action.type) {
+    case "SET_LIST_NAME":
+      return Object.assign({}, state, {
+        selectedList: action.payload.id
+      });
     case "SET_ITEM_SUGGESTIONS":
       return Object.assign({}, state, {
         itemSuggestions: action.payload.suggestions
