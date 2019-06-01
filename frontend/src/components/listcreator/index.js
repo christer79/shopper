@@ -40,11 +40,17 @@ function ListCreator() {
                   name: form.name
                 }
               });
+              setValues({ name: "" });
             }}
             noValidate
             autoComplete="off"
           >
-            <input type="text" name="name" onChange={updateField} />
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={updateField}
+            />
             <input type="submit" name="Add" />
           </form>
         )}
