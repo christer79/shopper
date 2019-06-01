@@ -67,12 +67,12 @@ func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*Lis
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
-
+	var list_owner = true
 	sqstm, err := r.DB.Prepare("INSERT INTO lists(list_id,list_name, user_uid, owner) VALUES($1,$2,$3,$4) RETURNING id")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = sqstm.Exec(input.ID, input.Name, user.UID, true)
+	_, err = sqstm.Exec(input.ID, input.Name, user.UID, list_owner)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,7 +86,8 @@ func (r *mutationResolver) DeleteList(ctx context.Context, id string) (*List, er
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
-	sqstm, err := r.DB.Prepare("DELETE FROM lists WHERE list_id = $1 AND user_id = $2")
+	var list_owner = true
+	sqstm, err := r.DB.Prepare("DELETE FROM lists WHERE list_id = $1 AND user_uid = $2")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,10 +95,11 @@ func (r *mutationResolver) DeleteList(ctx context.Context, id string) (*List, er
 	if err != nil {
 		log.Fatal(err)
 	}
-	//TODO: if deleteing from lists fail do not remove sectioin and item lists
+
+	// TODO: Verify owner of list before deleting tables, only dete table if all references in tn lists are gone.
 	r.DeleteListsDB(id)
 
-	return &List{Name: "", ID: id, Sections: []*Section{}, Items: []*Item{}}, nil
+	return &List{Name: "", ID: id, Owner: list_owner, Sections: []*Section{}, Items: []*Item{}}, nil
 }
 func (r *mutationResolver) CreateItem(ctx context.Context, input *NewItem) (*Item, error) {
 	panic("not implemented")
@@ -137,9 +139,7 @@ func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
 	for rows.Next() {
 		var i List
 		var id int
-		var owner bool
-		// TODO. get Sectins and Items for the list
-		err := rows.Scan(&id, &i.ID, &i.Name, &owner)
+		err := rows.Scan(&id, &i.ID, &i.Name, &i.Owner)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -58,6 +58,7 @@ type ComplexityRoot struct {
 		ID       func(childComplexity int) int
 		Items    func(childComplexity int) int
 		Name     func(childComplexity int) int
+		Owner    func(childComplexity int) int
 		Sections func(childComplexity int) int
 	}
 
@@ -205,6 +206,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.List.Name(childComplexity), true
+
+	case "List.owner":
+		if e.complexity.List.Owner == nil {
+			break
+		}
+
+		return e.complexity.List.Owner(childComplexity), true
 
 	case "List.sections":
 		if e.complexity.List.Sections == nil {
@@ -521,6 +529,7 @@ type Suggestion {
 type List {
   name: String!
   id: ID!
+  owner: Boolean!
   sections: [Section!]
   items: [Item!]
 }
@@ -1017,6 +1026,33 @@ func (ec *executionContext) _List_id(ctx context.Context, field graphql.Collecte
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _List_owner(ctx context.Context, field graphql.CollectedField, obj *List) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "List",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Owner, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _List_sections(ctx context.Context, field graphql.CollectedField, obj *List) graphql.Marshaler {
@@ -2699,6 +2735,11 @@ func (ec *executionContext) _List(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "id":
 			out.Values[i] = ec._List_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "owner":
+			out.Values[i] = ec._List_owner(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

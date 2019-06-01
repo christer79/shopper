@@ -24,6 +24,7 @@ type Suggestion {
 type List {
   name: String!
   id: ID!
+  owner: Boolean!
   sections: [Section!]
   items: [Item!]
 }

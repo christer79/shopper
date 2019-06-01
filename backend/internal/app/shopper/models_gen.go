@@ -16,6 +16,7 @@ type Item struct {
 type List struct {
 	Name     string     `json:"name"`
 	ID       string     `json:"id"`
+	Owner    bool       `json:"owner"`
 	Sections []*Section `json:"sections"`
 	Items    []*Item    `json:"items"`
 }
