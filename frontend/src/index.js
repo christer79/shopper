@@ -12,19 +12,15 @@ import { devToolsEnhancer } from "redux-devtools-extension";
 import { createStore } from "redux";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 
-import { ApolloProvider } from "react-apollo";
-import ApolloClient from "apollo-client";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { split } from "apollo-link";
-import { HttpLink } from "apollo-link-http";
-import { WebSocketLink } from "apollo-link-ws";
-import { getMainDefinition } from "apollo-utilities";
-
 import firebase from "firebase/app";
 import "firebase/app";
 import "firebase/auth";
 
-import { FirebaseAuthProvider } from "@react-firebase/auth";
+import {
+  FirebaseAuthConsumer,
+  FirebaseAuthProvider
+} from "@react-firebase/auth";
+
 import { firebaseConfig } from "./config/firebaseAuth";
 
 const persistConfig = {
@@ -39,51 +35,16 @@ const store = createStore(persistedReducer, devToolsEnhancer());
 const persistor = persistStore(store);
 persistor.purge();
 
-const httpLink = new HttpLink({
-  uri: process.env.REACT_APP_MOMENTS_GRAPHQL_HTTP_URL
-});
-
-const wsLink = new WebSocketLink({
-  uri: process.env.REACT_APP_MOMENTS_GRAPHQL_WEBSOCKET_URL,
-  options: {
-    lazy: true,
-    reconnect: true,
-    connectionCallback: err => {
-      if (err) {
-        console.log("Error Connecting to Subscriptions Server", err);
-      }
-    }
-  }
-});
-
-// using the ability to split links, you can send data to each link
-// depending on what kind of operation is being sent
-const graphqlLink = split(
-  // split based on operation type
-  ({ query }) => {
-    const definition = getMainDefinition(query);
-    return (
-      definition.kind === "OperationDefinition" &&
-      definition.operation === "subscription"
-    );
-  },
-  wsLink,
-  httpLink
-);
-
-const client = new ApolloClient({
-  link: graphqlLink,
-  cache: new InMemoryCache()
-});
-
 ReactDOM.render(
   <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
     <Provider store={store}>
-      <ApolloProvider client={client}>
-        <PersistGate loading={null} persistor={persistor}>
-          <App />
-        </PersistGate>
-      </ApolloProvider>
+      <PersistGate loading={null} persistor={persistor}>
+        <FirebaseAuthConsumer>
+          {authState => {
+            return <App authState={authState} />;
+          }}
+        </FirebaseAuthConsumer>
+      </PersistGate>
     </Provider>
   </FirebaseAuthProvider>,
   document.getElementById("root")

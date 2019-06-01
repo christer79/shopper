@@ -9,7 +9,15 @@ import { DragDropContext } from "react-beautiful-dnd";
 import SignInScreen from "./components/firebasesignin";
 import ListSelector from "./components/listselector";
 import styled from "styled-components";
-import "firebase/auth";
+import * as firebase from "firebase";
+
+import { ApolloProvider } from "react-apollo";
+import ApolloClient from "apollo-client";
+import { InMemoryCache } from "apollo-cache-inmemory";
+import { split, concat, ApolloLink } from "apollo-link";
+import { HttpLink } from "apollo-link-http";
+import { WebSocketLink } from "apollo-link-ws";
+import { getMainDefinition } from "apollo-utilities";
 
 import { FirebaseAuthConsumer, IfFirebaseAuthed } from "@react-firebase/auth";
 
@@ -18,7 +26,8 @@ import {
   itemOrderUnsynced,
   setItems,
   toggleChecked,
-  closeEditItemModal
+  closeEditItemModal,
+  setToken
 } from "./actions/actions";
 import { connect } from "react-redux";
 
@@ -35,7 +44,8 @@ function mapStateToProps(state) {
     sections: state.sections,
     items: state.items,
     editItemModalShowing: state.editItemModal.Showing,
-    editItemModalItemId: state.editItemModal.ItemId
+    editItemModalItemId: state.editItemModal.ItemId,
+    token: state.token
   };
 }
 
@@ -44,14 +54,79 @@ const mapDispatchToProps = {
   itemOrderUnsynced,
   setItems,
   toggleChecked,
-  closeEditItemModal
+  closeEditItemModal,
+  setToken
 };
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.onDragEnd = this.onDragEnd.bind(this);
+    this.componentWillMount = this.componentWillMount.bind(this);
   }
+
+  httpLink = new HttpLink({
+    uri: process.env.REACT_APP_MOMENTS_GRAPHQL_HTTP_URL
+  });
+
+  wsLink = new WebSocketLink({
+    uri: process.env.REACT_APP_MOMENTS_GRAPHQL_WEBSOCKET_URL,
+    options: {
+      lazy: true,
+      reconnect: true,
+      connectionCallback: err => {
+        if (err) {
+          console.log("Error Connecting to Subscriptions Server", err);
+        }
+      }
+    }
+  });
+
+  // using the ability to split links, you can send data to each link
+  // depending on what kind of operation is being sent
+  graphqlLink = split(
+    // split based on operation type
+    ({ query }) => {
+      const definition = getMainDefinition(query);
+      return (
+        definition.kind === "OperationDefinition" &&
+        definition.operation === "subscription"
+      );
+    },
+    this.wsLink,
+    this.httpLink
+  );
+
+  componentWillMount() {
+    this.listener = firebase.auth().onAuthStateChanged(authUser => {
+      authUser.getIdToken().then(token => {
+        this.props.setToken(token);
+      });
+    });
+  }
+
+  componentWillUnmount() {
+    this.listener();
+  }
+
+  authMiddleware = new ApolloLink((operation, forward) => {
+    console.log("Token ApolloLink: ", this.props.token);
+    operation.setContext({
+      headers: {
+        Authorization: "Bearer " + this.props.token
+      }
+    });
+    //
+    // // Add onto payload for WebSocket authentication
+    // (operation as Operation & { authToken: string | undefined }).authToken = localStorage.getItem("token");
+
+    return forward(operation);
+  });
+
+  client = new ApolloClient({
+    link: concat(this.authMiddleware, this.graphqlLink),
+    cache: new InMemoryCache()
+  });
 
   onDragEnd = result => {
     const { destination, source, draggableId, type } = result;
@@ -168,34 +243,42 @@ class App extends Component {
             }
           }}
         </FirebaseAuthConsumer>
+        <ApolloProvider client={this.client}>
+          <IfFirebaseAuthed>
+            {authState => {
+              if (this.props.token === "") {
+                return <div>Waiting for token</div>;
+              }
+              if (this.props.selectedList === "") {
+                return <ListSelector />;
+              }
+              return (
+                <div>
+                  {this.props.editItemModalShowing ? (
+                    <div
+                      onClick={this.closeModalHandler}
+                      className="back-drop"
+                    />
+                  ) : null}
+                  <Modal
+                    className="modal"
+                    show={this.props.editItemModalShowing}
+                    close={this.closeModalHandler}
+                  >
+                    <EditItemForm editedItem={this.props.editItemModalItemId} />
+                  </Modal>
 
-        <IfFirebaseAuthed>
-          {() => {
-            if (this.props.selectedList === "") {
-              return <ListSelector />;
-            }
-            return (
-              <div>
-                {this.props.editItemModalShowing ? (
-                  <div onClick={this.closeModalHandler} className="back-drop" />
-                ) : null}
-                <Modal
-                  className="modal"
-                  show={this.props.editItemModalShowing}
-                  close={this.closeModalHandler}
-                >
-                  <EditItemForm editedItem={this.props.editItemModalItemId} />
-                </Modal>
-                <Api items={this.props.items} onSynced={this.handleSynced} />
-                <AddItemForm handleSubmit={this.handleAdd} />
-                <DragDropContext onDragEnd={this.onDragEnd}>
-                  <Lists />
-                </DragDropContext>
-                <Menu />
-              </div>
-            );
-          }}
-        </IfFirebaseAuthed>
+                  <Api items={this.props.items} onSynced={this.handleSynced} />
+                  <AddItemForm handleSubmit={this.handleAdd} />
+                  <DragDropContext onDragEnd={this.onDragEnd}>
+                    <Lists />
+                  </DragDropContext>
+                  <Menu />
+                </div>
+              );
+            }}
+          </IfFirebaseAuthed>
+        </ApolloProvider>
       </Container>
     );
   }

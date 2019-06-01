@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"log"
+
+	"github.com/christer79/shopper/backend/internal/app/auth"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 type Resolver struct {
 	DB *sql.DB
@@ -61,11 +63,16 @@ func (r *Resolver) Subscription() SubscriptionResolver {
 type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*List, error) {
-	sqstm, err := r.DB.Prepare("INSERT INTO lists(list_id,list_name) VALUES($1,$2) RETURNING id")
+	user, ok := auth.FromContext(ctx)
+	if !ok {
+		log.Fatalf("No user in context\n")
+	}
+
+	sqstm, err := r.DB.Prepare("INSERT INTO lists(list_id,list_name, user_uid, owner) VALUES($1,$2,$3,$4) RETURNING id")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = sqstm.Exec(input.ID, input.Name)
+	_, err = sqstm.Exec(input.ID, input.Name, user.UID, true)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -73,15 +80,21 @@ func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*Lis
 
 	return &List{Name: input.Name, ID: input.ID, Sections: []*Section{}, Items: []*Item{}}, nil
 }
+
 func (r *mutationResolver) DeleteList(ctx context.Context, id string) (*List, error) {
-	sqstm, err := r.DB.Prepare("DELETE FROM lists WHERE list_id = $1")
+	user, ok := auth.FromContext(ctx)
+	if !ok {
+		log.Fatalf("No user in context\n")
+	}
+	sqstm, err := r.DB.Prepare("DELETE FROM lists WHERE list_id = $1 AND user_id = $2")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = sqstm.Exec(id)
+	_, err = sqstm.Exec(id, user.UID)
 	if err != nil {
 		log.Fatal(err)
 	}
+	//TODO: if deleteing from lists fail do not remove sectioin and item lists
 	r.DeleteListsDB(id)
 
 	return &List{Name: "", ID: id, Sections: []*Section{}, Items: []*Item{}}, nil
@@ -109,7 +122,12 @@ type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
 	log.Println("In lists")
-	query := "SELECT id, list_id, list_name FROM lists;"
+	user, ok := auth.FromContext(ctx)
+	if !ok {
+		log.Fatalf("No user in context\n")
+	}
+	query := "SELECT id, list_id, list_name , owner FROM lists WHERE user_uid = '" + user.UID + "';"
+	log.Printf("query: %v", query)
 	rows, err := r.DB.Query(query)
 	defer rows.Close()
 	if err != nil {
@@ -119,8 +137,9 @@ func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
 	for rows.Next() {
 		var i List
 		var id int
+		var owner bool
 		// TODO. get Sectins and Items for the list
-		err := rows.Scan(&id, &i.ID, &i.Name)
+		err := rows.Scan(&id, &i.ID, &i.Name, &owner)
 		if err != nil {
 			log.Fatal(err)
 		}

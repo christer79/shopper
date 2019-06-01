@@ -24,6 +24,14 @@ export function setListName(id) {
   };
 }
 
+const SET_TOKEN = "SET_TOKEN";
+export function setToken(token) {
+  return {
+    type: SET_TOKEN,
+    payload: { token: token }
+  };
+}
+
 const SET_ITEM_SUGGESTIONS = "SET_ITEM_SUGGESTIONS";
 export function setItemSuggestions(itemSuggestions) {
   return {

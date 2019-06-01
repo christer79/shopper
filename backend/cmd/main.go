@@ -8,7 +8,9 @@ import (
 
 	"github.com/rs/cors"
 
+	"github.com/christer79/shopper/backend/internal/app/auth"
 	"github.com/christer79/shopper/backend/internal/app/shopper"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -17,11 +19,23 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
+
+	firebase "firebase.google.com/go"
+	"golang.org/x/net/context"
+	"google.golang.org/api/option"
 )
 
 const defaultPort = "3500"
 
 func main() {
+
+	opt := option.WithCredentialsFile("config/serviceAccountKey.json")
+	fbapp, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("%v\n", fbapp)
+
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Error opening database: %q", err)
@@ -47,12 +61,13 @@ func main() {
 		OptionsPassthrough: true,
 	})
 
-	r := mux.NewRouter()
-	r.HandleFunc("/playground", handler.Playground("GraphQL playground", "/graphql")).Methods("GET")
-	r.Handle("/graphql", c.Handler(handler.GraphQL(app.NewExecutableSchema(app.Config{Resolvers: &app.Resolver{DB: db}})))).Methods("GET", "POST", "OPTIONS")
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("build/static"))))
-	r.PathPrefix("/web").Handler(http.StripPrefix("/", http.FileServer(http.Dir("build"))))
+	authFunc := auth.JWTHandler("config/serviceAccountKey.json")
+	router := mux.NewRouter()
+	router.HandleFunc("/playground", handler.Playground("GraphQL playground", "/graphql")).Methods("GET")
+	router.Handle("/graphql", c.Handler(authFunc(handler.GraphQL(app.NewExecutableSchema(app.Config{Resolvers: &app.Resolver{DB: db}}))))).Methods("GET", "POST", "OPTIONS")
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("build/static"))))
+	router.PathPrefix("/web").Handler(http.StripPrefix("/", http.FileServer(http.Dir("build"))))
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 
 }

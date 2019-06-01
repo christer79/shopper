@@ -1,4 +1,5 @@
 const initialState = {
+  token: "",
   selectedList: "",
   sections: {
     list: [], // list element:{ title: "", id: ""}
@@ -27,6 +28,10 @@ function reducer(state = initialState, action) {
   var newSections;
   var newItems;
   switch (action.type) {
+    case "SET_TOKEN":
+      return Object.assign({}, state, {
+        token: action.payload.token
+      });
     case "SET_LIST_NAME":
       return Object.assign({}, state, {
         selectedList: action.payload.id
