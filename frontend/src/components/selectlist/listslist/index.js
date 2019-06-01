@@ -1,7 +1,7 @@
 import React from "react";
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
-import { setListName } from "../../actions/actions";
+import { setListName } from "../../../actions/actions";
 import { connect } from "react-redux";
 import List from "../list";
 const LISTS = gql`

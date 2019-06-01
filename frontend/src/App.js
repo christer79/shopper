@@ -7,7 +7,7 @@ import Menu from "./Menu";
 import EditItemForm from "./EditItemForm";
 import { DragDropContext } from "react-beautiful-dnd";
 import SignInScreen from "./components/firebasesignin";
-import ListSelector from "./components/listselector";
+import ListSelector from "./components/selectlist/listselector";
 import styled from "styled-components";
 import * as firebase from "firebase";
 
@@ -110,7 +110,6 @@ class App extends Component {
   }
 
   authMiddleware = new ApolloLink((operation, forward) => {
-    console.log("Token ApolloLink: ", this.props.token);
     operation.setContext({
       headers: {
         Authorization: "Bearer " + this.props.token

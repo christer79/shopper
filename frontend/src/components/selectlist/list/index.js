@@ -1,7 +1,7 @@
 import React from "react";
 import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
-import { setListName } from "../../actions/actions";
+import { setListName } from "../../../actions/actions";
 import { connect } from "react-redux";
 
 const DELETE_LIST = gql`
