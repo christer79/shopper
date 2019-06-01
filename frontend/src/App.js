@@ -224,7 +224,7 @@ class App extends Component {
       _items.push(newItems[i]);
     }
     _items.map((entry, index) => {
-      if (index != entry.position) {
+      if (index !== entry.position) {
         entry.synced = false;
         entry.position = index;
       }

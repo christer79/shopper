@@ -205,8 +205,7 @@ function reducer(state = initialState, action) {
       newSections.splice(action.payload.index1, 1);
       newSections.splice(action.payload.index2, 0, moved);
       newSections.map((entry, index) => {
-        console.log("eNTRY:", entry, index, entry.position);
-        if (index != entry.position) {
+        if (index !== entry.position) {
           entry.synced = false;
           entry.position = index;
         }
