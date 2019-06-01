@@ -45,15 +45,15 @@ export function updateEditItemModalItem(item) {
   return { type: UPDATE_EDIT_ITEM_MODAL_ITEM, payload: { item: item } };
 }
 const OPEN_EDIT_ITEM_MODAL = "OPEN_EDIT_ITEM_MODAL";
-export function openEditItemModal(item_id = "", item_name = "") {
+export function openEditItemModal(id = "", item_name = "") {
   return {
     type: OPEN_EDIT_ITEM_MODAL,
-    payload: { item_id: item_id, item_name: item_name }
+    payload: { id: id, item_name: item_name }
   };
 }
 
 const CLOSE_EDIT_ITEM_MODAL = "CLOSE_EDIT_ITEM_MODAL";
-export function closeEditItemModal(item_id) {
+export function closeEditItemModal(id) {
   return { type: CLOSE_EDIT_ITEM_MODAL };
 }
 export function toggleShowEmptyLists() {
@@ -68,8 +68,8 @@ export function itemOrderSynced() {
   return { type: ITEM_ORDER_SYNCED };
 }
 
-export function itemSynced(item_id) {
-  return { type: ITEM_SYNCED, payload: { id: item_id } };
+export function itemSynced(id) {
+  return { type: ITEM_SYNCED, payload: { id: id } };
 }
 
 export function addItem(item) {
@@ -79,17 +79,17 @@ export function addItem(item) {
 export function setItems(items) {
   return { type: SET_ITEMS, payload: { items: items } };
 }
-export function deleteItem(item_id) {
-  return { type: DELETE_ITEM, payload: { id: item_id } };
+export function deleteItem(id) {
+  return { type: DELETE_ITEM, payload: { id: id } };
 }
-export function toggleChecked(item_id) {
-  return { type: TOGGLE_CHECKED, payload: { id: item_id } };
+export function toggleChecked(id) {
+  return { type: TOGGLE_CHECKED, payload: { id: id } };
 }
 
-export function increaseAmount(item_id, amount) {
+export function increaseAmount(id, amount) {
   return {
     type: INCREASE_AMOUNT,
-    payload: { id: item_id, amount: amount }
+    payload: { id: id, amount: amount }
   };
 }
 export function addSection(section_name, section_id) {

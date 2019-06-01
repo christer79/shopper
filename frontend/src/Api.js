@@ -1,193 +1,189 @@
 import React from "react";
 import { connect } from "react-redux";
-import {
-  sectionOrderSynced,
-  setSections,
-  setItems,
-  itemSynced,
-  itemOrderSynced,
-  setItemSuggestions
-} from "./actions/actions";
 
-const getHostname = () => {
-  const defaultUrl = "https://murmuring-fortress-57803.herokuapp.com";
-  const url = process.env.REACT_APP_BACKEND_URL;
-  if (!url) {
-    return defaultUrl;
-  } else {
-    return "http://" + window.location.hostname + ":9090";
+import gql from "graphql-tag";
+
+import { setSections, setItems, itemSynced } from "./actions/actions";
+
+const LIST = gql`
+  query getList($id: ID!) {
+    list(id: $id) {
+      name
+      id
+      sections {
+        name
+        id
+        position
+      }
+      items {
+        id
+        name
+        amount
+        unit
+        section
+        checked
+        deleted
+        position
+      }
+    }
   }
-};
+`;
+
+const CREATE_ITEM = gql`
+  mutation createItem(
+    $id: ID!
+    $name: String!
+    $amount: Float
+    $unit: String
+    $section: String
+    $checked: Boolean
+    $deleted: Boolean
+    $position: Int
+    $table: ID!
+  ) {
+    createItem(
+      input: {
+        id: $id
+        name: $name
+        amount: $amount
+        unit: $unit
+        section: $section
+        checked: $checked
+        deleted: $deleted
+        position: $position
+        table: $table
+      }
+    ) {
+      id
+    }
+  }
+`;
+
+const UPDATE_ITEM = gql`
+  mutation updateItem(
+    $id: ID!
+    $name: String!
+    $amount: Float
+    $unit: String
+    $section: String
+    $checked: Boolean
+    $deleted: Boolean
+    $position: Int
+    $table: ID!
+  ) {
+    updateItem(
+      input: {
+        id: $id
+        name: $name
+        amount: $amount
+        unit: $unit
+        section: $section
+        checked: $checked
+        deleted: $deleted
+        position: $position
+        table: $table
+      }
+    ) {
+      id
+    }
+  }
+`;
 
 function mapStateToProps(state) {
   return {
     sections: state.sections,
     items: state.items,
-    itemOrderSyncedState: state.itemOrderSynced,
-    section_orderSynced: state.sectionOrderSynced
+    selectedList: state.selectedList
   };
 }
 
 const mapDispatchToProps = {
-  sectionOrderSynced,
   setSections,
   setItems,
-  itemSynced,
-  itemOrderSynced,
-  setItemSuggestions
+  itemSynced
 };
 
 class Api extends React.Component {
   constructor(props) {
     super(props);
-    this.syncStateWithServer = this.syncStateWithServer.bind(this);
-    this.toggleShowList = this.toggleShowList.bind(this);
     this.fetchFromRemote = this.fetchFromRemote.bind(this);
     this.componentDidMount = this.componentDidMount.bind(this);
-    this.state = { showlist: false };
-  }
-
-  toggleShowList() {
-    this.setState({ showlist: !this.state.showlist });
+    this.syncStateWithServer = this.syncStateWithServer.bind(this);
   }
 
   syncStateWithServer() {
-    // Sync sections
-    if (this.props.sections.section_orderSynced === false) {
-      fetch(getHostname() + "/api/sections", {
-        method: "post",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(this.props.sections)
-      })
-        .then(
-          function(response) {
-            if (response.ok) {
-              this.props.sectionOrderSynced();
-            }
-            return response.json(); //response.json() is resolving its promise. It waits for the body to load
-          }.bind(this)
-        )
-        .then(function(responseData) {});
-    }
-
-    // Sync items
-    const items = this.props.items;
-    const unsynced = items.filter(element => {
-      return element.synced !== true;
-    });
-
-    unsynced.forEach(
-      function(element, idx) {
-        fetch(getHostname() + "/api/items", {
-          method: "post",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(element)
-        })
-          .then(
-            function(response) {
-              if (response.ok) {
-                this.props.itemSynced(element.item_id);
+    console.log("syncStateWithServer");
+    this.props.items
+      .filter(item => item.synced === false)
+      .forEach(item => {
+        console.log("Unsynced item:", item);
+        if (item.isNew && item.isNew === true) {
+          this.props.client
+            .mutate({
+              mutation: CREATE_ITEM,
+              variables: {
+                id: item.id,
+                name: item.name,
+                amount: item.amount,
+                unit: item.unit,
+                section: item.section,
+                checked: item.checked,
+                deleted: item.deleted,
+                position: item.position,
+                table: this.props.selectedList
               }
-              return response.json(); //response.json() is resolving its promise. It waits for the body to load
-            }.bind(this)
-          )
-          .then(function(responseData) {});
-      }.bind(this)
-    );
-
-    // Sync item order
-    if (this.props.itemOrderSyncedState === false) {
-      var itemOrder = [];
-      this.props.items.forEach((item, index) => {
-        itemOrder.push({ item_id: item.item_id, order: index });
+            })
+            .then(data => {
+              console.log(data.data.createItem.id);
+              this.props.itemSynced(data.data.createItem.id);
+            });
+        }
+        if (item.synced === false && item.deleted === true) {
+          this.props.client
+            .mutate({
+              mutation: DELETE_ITEM,
+              variables: {
+                id: item.id
+              }
+            })
+            .then(data => {
+              this.props.itemSynced(data.data.createItem.id);
+            });
+        } else if (item.synced === false) {
+          this.props.client
+            .mutate({
+              mutation: UPDATE_ITEM,
+              variables: {
+                id: item.id,
+                name: item.name,
+                amount: item.amount,
+                unit: item.unit,
+                section: item.section,
+                checked: item.checked,
+                deleted: item.deleted,
+                position: item.position,
+                table: this.props.selectedList
+              }
+            })
+            .then(data => {
+              console.log(data.data.updateItem.id);
+              this.props.itemSynced(data.data.updateItem.id);
+            });
+        }
       });
-      fetch(getHostname() + "/api/items/order", {
-        method: "post",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(itemOrder)
-      })
-        .then(
-          function(response) {
-            if (response.ok) {
-              this.props.itemOrderSynced();
-            }
-            return response.json(); //response.json() is resolving its promise. It waits for the body to load
-          }.bind(this)
-        )
-        .then(function(responseData) {});
-    }
+    //forEach
   }
 
   fetchFromRemote() {
-    fetch(getHostname() + "/api/items", {
-      method: "get",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      }
-    })
-      .then(function(response) {
-        if (response.ok) {
-        }
-        return response.json(); //response.json() is resolving its promise. It waits for the body to load
+    this.props.client
+      .query({
+        query: LIST,
+        variables: { id: this.props.selectedList }
       })
-      .then(
-        function(responseData) {
-          if (!responseData.items) {
-            this.props.setItems([]);
-          } else {
-            this.props.setItems(responseData.items);
-          }
-        }.bind(this)
-      );
-
-    fetch(getHostname() + "/api/items/suggestions", {
-      method: "get",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      }
-    })
-      .then(function(response) {
-        if (response.ok) {
-        }
-        return response.json(); //response.json() is resolving its promise. It waits for the body to load
-      })
-      .then(
-        function(responseData) {
-          this.props.setItemSuggestions(responseData ? responseData : []);
-        }.bind(this)
-      );
-
-    fetch(getHostname() + "/api/sections", {
-      method: "get",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      }
-    })
-      .then(function(response) {
-        if (response.ok) {
-        }
-        return response.json(); //response.json() is resolving its promise. It waits for the body to load
-      })
-      .then(
-        function(responseData) {
-          this.props.setSections(
-            responseData.list ? responseData.list : [],
-            responseData.section_order ? responseData.section_order : []
-          );
-        }.bind(this)
-      );
+      .then(data => {
+        this.props.setItems(data.data.list.items);
+        this.props.setSections(data.data.list.sections);
+      });
   }
 
   componentDidMount() {

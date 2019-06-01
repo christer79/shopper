@@ -18,7 +18,7 @@ function mapStateToProps(state) {
 class AddItemForm extends Component {
   constructor(props) {
     super(props);
-    this.state = { item: null };
+    this.state = { name: null };
   }
   handleItemChange = event => {
     const pressedClear = !event;
@@ -28,10 +28,10 @@ class AddItemForm extends Component {
 
     if (event.__isNew__) {
       this.props.addItem({
-        item: event.label,
+        name: event.label,
         unit: "st",
         section: "section-0",
-        amount: ""
+        amount: 0.0
       });
     } else {
       // find correct item in itemSuggestions
@@ -41,8 +41,8 @@ class AddItemForm extends Component {
 
       // find in sections
       var section_id;
-      const section = this.props.sections.list.find(
-        section => section.title === suggested.section
+      const section = this.props.sections.find(
+        section => section.name === suggested.section
       );
       //   if not create section
       if (!section) {
@@ -57,18 +57,18 @@ class AddItemForm extends Component {
       }
       // add item with section and unit
       this.props.addItem({
-        item: event.label,
+        name: event.label,
         unit: suggested.unit,
         section: section_id,
-        amount: ""
+        amount: 0.0
       });
     }
-    this.setState({ item: null });
+    this.setState({ name: null });
   };
 
   render() {
     const itemOptions = this.props.itemSuggestions.map(function(item) {
-      return { label: item.item, value: item.section };
+      return { label: item.name, value: item.section };
     });
 
     return (

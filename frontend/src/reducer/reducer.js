@@ -1,11 +1,7 @@
 const initialState = {
   token: "",
   selectedList: "",
-  sections: {
-    list: [], // list element:{ title: "", id: ""}
-    section_order: [],
-    section_orderSynced: true
-  },
+  sections: [],
   itemOrderSynced: true,
   items: [], // items element: {}
   itemSuggestions: [],
@@ -15,7 +11,7 @@ const initialState = {
     itemId: "",
     itemToEdit: {
       item: "",
-      item_id: "",
+      id: "",
       amount: 0,
       unit: "",
       section: "",
@@ -53,7 +49,7 @@ function reducer(state = initialState, action) {
       });
     case "OPEN_EDIT_ITEM_MODAL":
       var itemToEdit;
-      if (action.payload.item_name === "" && action.payload.item_id === "") {
+      if (action.payload.item_name === "" && action.payload.id === "") {
         return state;
       }
 
@@ -62,26 +58,26 @@ function reducer(state = initialState, action) {
           item: action.payload.item_name,
           section: "section-0",
           section_name: "",
-          item_id: "",
+          id: "",
           amout: 0,
           unit: "st"
         };
       } else {
         itemToEdit = state.items.find(item => {
-          return item.item_id === action.payload.item_id;
+          return item.id === action.payload.id;
         });
         // Find section name
 
-        var section = state.sections.list.find(section => {
+        var section = state.sections.find(section => {
           return section.id === itemToEdit.section;
         });
-        itemToEdit.section_name = section.title;
+        itemToEdit.section_name = section.name;
       }
       return Object.assign({}, state, {
         editItemModal: {
           ...state.editItemModal,
           Showing: true,
-          itemId: action.payload.item_id,
+          itemId: action.payload.id,
           itemToEdit: itemToEdit
         }
       });
@@ -105,29 +101,31 @@ function reducer(state = initialState, action) {
       newItems = [...state.items];
 
       var index = newItems.findIndex(
-        item => item.item_id === action.payload.item.item_id
+        item => item.id === action.payload.item.id
       );
       var isNewItem = index === -1;
       item.synced = false;
 
       if (isNewItem) {
-        item.item_id =
+        item.id =
           "_" +
           Math.random()
             .toString(36)
             .substr(2, 9);
         item.checked = false;
         item.deleted = false;
+        item.isNew = true;
+        item.position = state.items.length;
         if (item.section === "" || !item.section) {
           const suggested = state.itemSuggestions.find(
-            suggestion => suggestion.item === item.item
+            suggestion => suggestion.name === item.name
           );
 
           if (!suggested) {
             item.section = "section-0";
           } else {
-            const section = state.sections.list.find(
-              section => section.title === suggested.section
+            const section = state.sections.find(
+              section => section.name === suggested.section
             );
             if (!section) {
               item.section = "section-0";
@@ -150,7 +148,7 @@ function reducer(state = initialState, action) {
     case "DELETE_ITEM":
       newItems = [...state.items];
       newItems.map(element => {
-        if (element.item_id === action.payload.id) {
+        if (element.id === action.payload.id) {
           element.synced = false;
           element.deleted = true;
         }
@@ -160,8 +158,9 @@ function reducer(state = initialState, action) {
     case "ITEM_SYNCED":
       newItems = [...state.items];
       newItems.map(element => {
-        if (element.item_id === action.payload.id) {
+        if (element.id === action.payload.id) {
           element.synced = true;
+          element.isNew = false;
         }
         return element;
       });
@@ -170,7 +169,7 @@ function reducer(state = initialState, action) {
       newItems = [...state.items];
 
       newItems.map(element => {
-        if (element.item_id === action.payload.id) {
+        if (element.id === action.payload.id) {
           element.synced = false;
           element.checked = !element.checked;
         }
@@ -179,7 +178,7 @@ function reducer(state = initialState, action) {
       return Object.assign({}, state, { items: newItems });
     case "INCREASE_AMOUNT":
       newItems = [...state.items];
-      index = newItems.findIndex(item => item.item_id === action.payload.id);
+      index = newItems.findIndex(item => item.id === action.payload.id);
       item = Object.assign({}, newItems[index]);
       item.synced = false;
       item.amount = item.amount + action.payload.amount;
@@ -198,11 +197,7 @@ function reducer(state = initialState, action) {
 
     case "SET_SECTIONS":
       return Object.assign({}, state, {
-        sections: {
-          list: action.payload.list,
-          section_order: action.payload.order,
-          section_orderSynced: true
-        }
+        sections: action.payload.list
       });
     case "ADD_SECTION":
       var id;
@@ -217,20 +212,16 @@ function reducer(state = initialState, action) {
       }
 
       return Object.assign({}, state, {
-        sections: {
-          list: [
-            ...state.sections.list,
-            { title: action.payload.section_name, id: id }
-          ],
-          section_order: [...state.sections.section_order, id],
-          section_orderSynced: false
-        }
+        sections: [
+          ...state.sections,
+          { name: action.payload.section_name, id: id }
+        ]
       });
     case "DELETE_SECTION":
       newSections = { ...state.sections };
       newItems = [...state.items];
 
-      newSections.list = newSections.list.filter(section => {
+      newSections = newSections.filter(section => {
         return section.id !== action.payload.section_id;
       });
       newSections.section_order = newSections.section_order.filter(

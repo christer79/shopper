@@ -9,13 +9,16 @@ function mapStateToProps(state) {
   return { sections: state.sections };
 }
 
+const sortFunction = function(a, b) {
+  if (a.position < b.position) return +1;
+  if (a.position > b.position) return -1;
+  return 0;
+};
+
 class SectionList extends React.Component {
   render() {
-    return this.props.sections.section_order.map((sectionID, index) => {
-      const section = this.props.sections.list.find(section => {
-        return section.id === sectionID;
-      });
-
+    return this.props.sections.sort(sortFunction).map((section, index) => {
+      console.log(section);
       return (
         <Draggable draggableId={section.id} index={index} key={section.id}>
           {provided => (
@@ -29,7 +32,7 @@ class SectionList extends React.Component {
                 selectSection={section.id}
                 showChecked={false}
                 showDeleted={false}
-                title={section.title}
+                title={section.name}
                 id={section.id}
                 key={section.id}
               />

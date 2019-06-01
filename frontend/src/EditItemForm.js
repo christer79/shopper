@@ -66,12 +66,12 @@ class EditItemForm extends Component {
       return;
     }
     const { label } = event;
-    const index = this.props.sections.list.findIndex(
-      item => item.title === label
+    const index = this.props.sections.findIndex(
+      section => section.name === label
     );
     if (index > -1) {
-      newItem.section = this.props.sections.list[index].id;
-      newItem.section_name = this.props.sections.list[index].title;
+      newItem.section = this.props.sections[index].id;
+      newItem.section_name = this.props.sections[index].name;
     } else {
       newItem.section =
         "_" +
@@ -107,20 +107,20 @@ class EditItemForm extends Component {
   };
 
   render() {
-    const { item, amount, unit, section_name } = this.props.itemToEdit;
-    const selectOptions = this.props.sections.list.map(function(item) {
-      return { label: item.title, value: item.id };
+    const { name, amount, unit, section_name } = this.props.itemToEdit;
+    const selectOptions = this.props.sections.map(function(section) {
+      return { label: section.name, value: section.id };
     });
     return (
       <ColContainer>
-        <Label HTMLfor="item">Item</Label>
+        <Label HTMLfor="name">Name</Label>
         <Input
-          placeholder="Item"
+          placeholder="Name"
           type="text"
-          id="item"
-          name="item"
-          key="input-item"
-          value={item}
+          id="name"
+          name="name"
+          key="input-name"
+          value={name}
           onChange={this.handleChange}
         />
         <Label HTMLfor="section">Section</Label>

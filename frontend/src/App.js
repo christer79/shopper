@@ -154,10 +154,10 @@ class App extends Component {
 
     itemOrderSynced = false;
     const draggedItemIndexInItems = newItems.findIndex(item => {
-      return item.item_id === draggableId;
+      return item.id === draggableId;
     });
     const draggedItem = newItems.find(item => {
-      return item.item_id === draggableId;
+      return item.id === draggableId;
     });
 
     var itemsInDestinationDroppable = null;
@@ -189,16 +189,16 @@ class App extends Component {
 
       if (addedAsLastIndex && droppableIdChanged) {
         const destinationItemId =
-          itemsInDestinationDroppable[destination.index - 1].item_id;
+          itemsInDestinationDroppable[destination.index - 1].id;
         const destinationItemIndexInItems = newItems.findIndex(item => {
-          return item.item_id === destinationItemId;
+          return item.id === destinationItemId;
         });
         newItems.splice(destinationItemIndexInItems + 1, 0, draggedItem);
       } else {
         const destinationItemId =
-          itemsInDestinationDroppable[destination.index].item_id;
+          itemsInDestinationDroppable[destination.index].id;
         var destinationItemIndexInItems = newItems.findIndex(item => {
-          return item.item_id === destinationItemId;
+          return item.id === destinationItemId;
         });
 
         const pulledUpInSameList =
@@ -267,7 +267,12 @@ class App extends Component {
                     <EditItemForm editedItem={this.props.editItemModalItemId} />
                   </Modal>
 
-                  <Api items={this.props.items} onSynced={this.handleSynced} />
+                  <Api
+                    client={this.client}
+                    items={this.props.items}
+                    onSynced={this.handleSynced}
+                  />
+
                   <AddItemForm handleSubmit={this.handleAdd} />
                   <DragDropContext onDragEnd={this.onDragEnd}>
                     <Lists />

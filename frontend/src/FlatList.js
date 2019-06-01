@@ -91,7 +91,7 @@ class FlatList extends React.Component {
 
     const listItems = renderItems.map((item, index) => {
       if (this.props.showEmptyLists) return null;
-      return <ListItem key={item.item_id} item={item} index={index} />;
+      return <ListItem key={item.id} item={item} index={index} />;
     });
 
     if (renderItems.length === 0 && !this.props.showEmptyLists) {

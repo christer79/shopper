@@ -42,8 +42,8 @@ class Clipboarder extends React.Component {
     const text = this.props.items
       .map(item => {
         return item.amount === 0
-          ? item.item
-          : item.item + " " + item.amount + " " + item.unit;
+          ? item.name
+          : item.name + " " + item.amount + " " + item.unit;
       })
       .join("\n");
     return text;

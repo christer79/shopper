@@ -67,7 +67,7 @@ class ListItem extends Component {
     const { item, index } = this.props;
     if (!item) return null;
     return (
-      <Draggable draggableId={item.item_id} index={index}>
+      <Draggable draggableId={item.id} index={index}>
         {provided => (
           <Container
             checked={item.checked}
@@ -79,19 +79,15 @@ class ListItem extends Component {
             <Input
               type="checkbox"
               checked={item.checked ? "checked" : ""}
-              onChange={() => this.props.toggleChecked(item.item_id)}
+              onChange={() => this.props.toggleChecked(item.id)}
             />
-            <ItemContainer>{item.item}</ItemContainer>
+            <ItemContainer>{item.name}</ItemContainer>
             {!item.checked ? (
-              <Button
-                onClick={() => this.props.openEditItemModal(item.item_id)}
-              >
+              <Button onClick={() => this.props.openEditItemModal(item.id)}>
                 E
               </Button>
             ) : (
-              <Button onClick={() => this.props.deleteItem(item.item_id)}>
-                D
-              </Button>
+              <Button onClick={() => this.props.deleteItem(item.id)}>D</Button>
             )}
           </Container>
         )}
