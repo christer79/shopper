@@ -9,6 +9,7 @@ import (
 	"io"
 	"strconv"
 	"sync"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -74,6 +75,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		List        func(childComplexity int, id string) int
 		Lists       func(childComplexity int) int
 		Suggestions func(childComplexity int) int
 	}
@@ -108,6 +110,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Lists(ctx context.Context) ([]*List, error)
+	List(ctx context.Context, id string) (*List, error)
 	Suggestions(ctx context.Context) ([]*Suggestion, error)
 }
 type SubscriptionResolver interface {
@@ -316,6 +319,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateSection(childComplexity, args["input"].(*NewSection)), true
+
+	case "Query.list":
+		if e.complexity.Query.List == nil {
+			break
+		}
+
+		args, err := ec.field_Query_list_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.List(childComplexity, args["id"].(string)), true
 
 	case "Query.lists":
 		if e.complexity.Query.Lists == nil {
@@ -536,6 +551,7 @@ type List {
 
 type Query {
   lists: [List!]
+  list(id: ID!): List!
   suggestions: [Suggestion!]
 }
 
@@ -713,6 +729,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_list_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -1373,6 +1403,40 @@ func (ec *executionContext) _Query_lists(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOList2ᚕᚖappᚐList(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_list(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_list_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().List(rctx, args["id"].(string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*List)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNList2ᚖappᚐList(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_suggestions(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -2824,6 +2888,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_lists(ctx, field)
+				return res
+			})
+		case "list":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_list(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "suggestions":

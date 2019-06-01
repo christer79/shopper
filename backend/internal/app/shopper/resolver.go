@@ -150,6 +150,9 @@ func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
 	}
 	return ret, nil
 }
+func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) Suggestions(ctx context.Context) ([]*Suggestion, error) {
 	panic("not implemented")
 }
