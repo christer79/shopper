@@ -23,7 +23,6 @@ import { FirebaseAuthConsumer, IfFirebaseAuthed } from "@react-firebase/auth";
 
 import {
   swapSections,
-  itemOrderUnsynced,
   setItems,
   toggleChecked,
   closeEditItemModal,
@@ -51,7 +50,6 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = {
   swapSections,
-  itemOrderUnsynced,
   setItems,
   toggleChecked,
   closeEditItemModal,
@@ -140,7 +138,6 @@ class App extends Component {
     const droppableIdChanged = source.droppableId !== destination.droppableId;
     const indexChanged = destination.index !== source.index;
     const droppedToChecked = destination.droppableId === "checked-list";
-    var itemOrderSynced = true;
     if (!droppableIdChanged && !indexChanged) {
       return;
     }
@@ -154,7 +151,6 @@ class App extends Component {
 
     var newItems = this.props.items;
 
-    itemOrderSynced = false;
     const draggedItemIndexInItems = newItems.findIndex(item => {
       return item.id === draggableId;
     });
@@ -236,7 +232,6 @@ class App extends Component {
     });
 
     this.props.setItems(_items);
-    if (!itemOrderSynced) this.props.itemOrderUnsynced();
   };
 
   closeModalHandler = () => {

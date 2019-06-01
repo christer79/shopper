@@ -1,8 +1,3 @@
-const SECTION_ORDER_SYNCED = "SECTION_ORDER_SYNCED";
-const SECTION_ORDER_UNSYNCED = "SECTION_ORDER_UNSYNCED";
-const ITEM_ORDER_SYNCED = "ITEM_ORDER_SYNCED";
-const ITEM_ORDER_UNSYNCED = "ITEM_ORDER_UNSYNCED";
-
 const ADD_SECTION = "ADD_SECTION";
 const DELETE_SECTION = "DELETE_SECTION";
 const SWAP_SECTIONS = "SWAP_SECTIONS";
@@ -57,14 +52,6 @@ export function closeEditItemModal(id) {
 }
 export function toggleShowEmptyLists() {
   return { type: TOGGLE_SHOW_EMPTY_LISTS };
-}
-
-export function itemOrderUnsynced() {
-  return { type: ITEM_ORDER_UNSYNCED };
-}
-
-export function itemOrderSynced() {
-  return { type: ITEM_ORDER_SYNCED };
 }
 
 const ITEM_SYNCED = "ITEM_SYNCED";
@@ -123,12 +110,4 @@ export function swapSections(index1, index2, id) {
     type: SWAP_SECTIONS,
     payload: { index1: index1, index2: index2, id: id }
   };
-}
-
-export function sectionOrderSynced() {
-  return { type: SECTION_ORDER_SYNCED };
-}
-
-export function sectionOrderUnsynced() {
-  return { type: SECTION_ORDER_UNSYNCED };
 }

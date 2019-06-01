@@ -10,8 +10,8 @@ function mapStateToProps(state) {
 }
 
 const sortFunction = function(a, b) {
-  if (a.position < b.position) return +1;
-  if (a.position > b.position) return -1;
+  if (a.position < b.position) return -1;
+  if (a.position > b.position) return +1;
   return 0;
 };
 

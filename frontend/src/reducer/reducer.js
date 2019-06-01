@@ -2,7 +2,6 @@ const initialState = {
   token: "",
   selectedList: "",
   sections: [],
-  itemOrderSynced: true,
   items: [], // items element: {}
   itemSuggestions: [],
   showEmptyLists: false,
@@ -18,6 +17,12 @@ const initialState = {
       section_name: ""
     }
   }
+};
+
+const sortFunction = function(a, b) {
+  if (a.position < b.position) return -1;
+  if (a.position > b.position) return +1;
+  return 0;
 };
 
 function reducer(state = initialState, action) {
@@ -195,14 +200,18 @@ function reducer(state = initialState, action) {
       newItems[index] = item;
       return Object.assign({}, state, { items: newItems });
     case "SWAP_SECTIONS":
-      newSections = { ...state.sections };
-      newSections.section_order.splice(action.payload.index1, 1);
-      newSections.section_order.splice(
-        action.payload.index2,
-        0,
-        action.payload.id
-      );
-      newSections.section_orderSynced = false;
+      newSections = [...state.sections.sort(sortFunction)];
+      const moved = newSections[action.payload.index1];
+      newSections.splice(action.payload.index1, 1);
+      newSections.splice(action.payload.index2, 0, moved);
+      newSections.map((entry, index) => {
+        console.log("eNTRY:", entry, index, entry.position);
+        if (index != entry.position) {
+          entry.synced = false;
+          entry.position = index;
+        }
+        return entry;
+      });
       return Object.assign({}, state, { sections: newSections });
 
     case "SET_SECTIONS":
@@ -256,10 +265,7 @@ function reducer(state = initialState, action) {
         sections: newSections,
         items: newItems
       });
-    case "SECTION_ORDER_SYNCED":
-      newSections = { ...state.sections };
-      newSections.section_orderSynced = true;
-      return Object.assign({}, state, { sections: newSections });
+
     default:
       return state;
   }
