@@ -18,7 +18,6 @@ const sortFunction = function(a, b) {
 class SectionList extends React.Component {
   render() {
     return this.props.sections.sort(sortFunction).map((section, index) => {
-      console.log(section);
       return (
         <Draggable draggableId={section.id} index={index} key={section.id}>
           {provided => (

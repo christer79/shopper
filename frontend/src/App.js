@@ -150,6 +150,8 @@ class App extends Component {
       return;
     }
 
+    console.log(result);
+
     var newItems = this.props.items;
 
     itemOrderSynced = false;
@@ -176,6 +178,7 @@ class App extends Component {
     }
 
     const destinationSectionEmpty = itemsInDestinationDroppable.length === 0;
+
     const addedAsLastIndex =
       destination.index >= itemsInDestinationDroppable.length;
 
@@ -224,6 +227,14 @@ class App extends Component {
     for (var i = 0; i < newItems.length; i++) {
       _items.push(newItems[i]);
     }
+    _items.map((entry, index) => {
+      if (index != entry.position) {
+        entry.synced = false;
+        entry.position = index;
+      }
+      return entry;
+    });
+
     this.props.setItems(_items);
     if (!itemOrderSynced) this.props.itemOrderUnsynced();
   };
@@ -267,13 +278,9 @@ class App extends Component {
                     <EditItemForm editedItem={this.props.editItemModalItemId} />
                   </Modal>
 
-                  <Api
-                    client={this.client}
-                    items={this.props.items}
-                    onSynced={this.handleSynced}
-                  />
+                  <Api client={this.client} />
 
-                  <AddItemForm handleSubmit={this.handleAdd} />
+                  <AddItemForm />
                   <DragDropContext onDragEnd={this.onDragEnd}>
                     <Lists />
                   </DragDropContext>

@@ -248,7 +248,6 @@ class Api extends React.Component {
             });
         }
       });
-    //forEach
   }
 
   fetchFromRemote() {
@@ -258,9 +257,21 @@ class Api extends React.Component {
         variables: { id: this.props.selectedList }
       })
       .then(data => {
-        this.props.setItems(data.data.list.items ? data.data.list.items : []);
+        this.props.setItems(
+          data.data.list.items
+            ? data.data.list.items.map(entry => {
+                entry.synced = true;
+                return entry;
+              })
+            : []
+        );
         this.props.setSections(
-          data.data.list.sections ? data.data.list.sections : []
+          data.data.list.sections
+            ? data.data.list.sections.map(entry => {
+                entry.synced = true;
+                return entry;
+              })
+            : []
         );
       });
   }

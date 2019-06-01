@@ -77,9 +77,15 @@ class Title extends React.Component {
   }
 }
 
+const sortFunction = function(a, b) {
+  if (a.position < b.position) return -1;
+  if (a.position > b.position) return +1;
+  return 0;
+};
+
 class FlatList extends React.Component {
   render() {
-    const renderItems = this.props.items.filter(item => {
+    const renderItems = this.props.items.sort(sortFunction).filter(item => {
       return (
         item.checked === this.props.showChecked &&
         item.deleted === this.props.showDeleted &&
