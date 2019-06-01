@@ -58,13 +58,16 @@ input NewList {
   name: String!
   id: ID!
 }
-
+input DeleteItem {
+  id: ID!
+  table: ID!
+}
 type Mutation {
   createList(input: NewList): List
   deleteList(id: ID!): List
   createItem(input: NewItem): Item
   updateItem(input: NewItem!): Item
-  deleteItem(id: ID!): Item
+  deleteItem(input: DeleteItem!): Item
   createSection(input: NewSection): Section
   updateSection(input: NewSection): Section
   deleteSection(id: ID!): Section
