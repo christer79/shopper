@@ -16,15 +16,24 @@ const mapDispatchToProps = {
   setListName
 };
 
+class Error extends React.Component {
+  render() {
+    return <div>Error loading: {this.props.error}</div>;
+  }
+}
+
+class Loading extends React.Component {
+  render() {
+    return <div>Loading</div>;
+  }
+}
 class ListsList extends React.Component {
   render() {
-    console.log(this.props);
     return (
       <Query query={LISTS} errorPolicy="all">
         {({ error, loading, data, ...result }) => {
-          console.log(data.lists);
-          if (error) return <span>Error: {error}</span>;
-          if (loading) return <span> Loading...</span>;
+          if (error) return <Error error={error} />;
+          if (loading) return <Loading />;
           return data.lists ? (
             data.lists.map(list => (
               <List key={list.id} name={list.name} id={list.id} />
