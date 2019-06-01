@@ -7,6 +7,11 @@ type DeleteItem struct {
 	Table string `json:"table"`
 }
 
+type DeleteSection struct {
+	ID    string `json:"id"`
+	Table string `json:"table"`
+}
+
 type Item struct {
 	ID       string   `json:"id"`
 	Name     string   `json:"name"`

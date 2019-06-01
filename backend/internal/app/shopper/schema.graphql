@@ -62,6 +62,10 @@ input DeleteItem {
   id: ID!
   table: ID!
 }
+input DeleteSection {
+  id: ID!
+  table: ID!
+}
 type Mutation {
   createList(input: NewList): List
   deleteList(id: ID!): List
@@ -70,7 +74,7 @@ type Mutation {
   deleteItem(input: DeleteItem!): Item
   createSection(input: NewSection): Section
   updateSection(input: NewSection): Section
-  deleteSection(id: ID!): Section
+  deleteSection(input: DeleteSection!): Section
 }
 
 input SubscritionInput {

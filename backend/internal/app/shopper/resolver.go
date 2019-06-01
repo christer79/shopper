@@ -238,7 +238,7 @@ func (r *mutationResolver) CreateSection(ctx context.Context, input *NewSection)
 func (r *mutationResolver) UpdateSection(ctx context.Context, input *NewSection) (*Section, error) {
 	panic("not implemented")
 }
-func (r *mutationResolver) DeleteSection(ctx context.Context, id string) (*Section, error) {
+func (r *mutationResolver) DeleteSection(ctx context.Context, input DeleteSection) (*Section, error) {
 	panic("not implemented")
 }
 

@@ -69,7 +69,7 @@ type ComplexityRoot struct {
 		CreateSection func(childComplexity int, input *NewSection) int
 		DeleteItem    func(childComplexity int, input DeleteItem) int
 		DeleteList    func(childComplexity int, id string) int
-		DeleteSection func(childComplexity int, id string) int
+		DeleteSection func(childComplexity int, input DeleteSection) int
 		UpdateItem    func(childComplexity int, input NewItem) int
 		UpdateSection func(childComplexity int, input *NewSection) int
 	}
@@ -106,7 +106,7 @@ type MutationResolver interface {
 	DeleteItem(ctx context.Context, input DeleteItem) (*Item, error)
 	CreateSection(ctx context.Context, input *NewSection) (*Section, error)
 	UpdateSection(ctx context.Context, input *NewSection) (*Section, error)
-	DeleteSection(ctx context.Context, id string) (*Section, error)
+	DeleteSection(ctx context.Context, input DeleteSection) (*Section, error)
 }
 type QueryResolver interface {
 	Lists(ctx context.Context) ([]*List, error)
@@ -294,7 +294,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteSection(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.DeleteSection(childComplexity, args["input"].(DeleteSection)), true
 
 	case "Mutation.updateItem":
 		if e.complexity.Mutation.UpdateItem == nil {
@@ -582,6 +582,10 @@ input DeleteItem {
   id: ID!
   table: ID!
 }
+input DeleteSection {
+  id: ID!
+  table: ID!
+}
 type Mutation {
   createList(input: NewList): List
   deleteList(id: ID!): List
@@ -590,7 +594,7 @@ type Mutation {
   deleteItem(input: DeleteItem!): Item
   createSection(input: NewSection): Section
   updateSection(input: NewSection): Section
-  deleteSection(id: ID!): Section
+  deleteSection(input: DeleteSection!): Section
 }
 
 input SubscritionInput {
@@ -682,14 +686,14 @@ func (ec *executionContext) field_Mutation_deleteList_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteSection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+	var arg0 DeleteSection
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNDeleteSection2appᚐDeleteSection(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1373,7 +1377,7 @@ func (ec *executionContext) _Mutation_deleteSection(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteSection(rctx, args["id"].(string))
+		return ec.resolvers.Mutation().DeleteSection(rctx, args["input"].(DeleteSection))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -2606,6 +2610,30 @@ func (ec *executionContext) unmarshalInputDeleteItem(ctx context.Context, v inte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDeleteSection(ctx context.Context, v interface{}) (DeleteSection, error) {
+	var it DeleteSection
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "table":
+			var err error
+			it.Table, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewItem(ctx context.Context, v interface{}) (NewItem, error) {
 	var it NewItem
 	var asMap = v.(map[string]interface{})
@@ -3314,6 +3342,10 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 
 func (ec *executionContext) unmarshalNDeleteItem2appᚐDeleteItem(ctx context.Context, v interface{}) (DeleteItem, error) {
 	return ec.unmarshalInputDeleteItem(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNDeleteSection2appᚐDeleteSection(ctx context.Context, v interface{}) (DeleteSection, error) {
+	return ec.unmarshalInputDeleteSection(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
