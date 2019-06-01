@@ -49,7 +49,7 @@ func (r *Resolver) CreateNewListDB(name string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sqstm, err = r.DB.Prepare("CREATE TABLE " + name + "_sections(id SERIAL PRIMARY KEY, section_id VARCHAR(50) UNIQUE NOT NULL, title VARCHAR(50) NOT NULL, section_order INTEGER NOT NULL);")
+	sqstm, err = r.DB.Prepare("CREATE TABLE " + name + "_sections(id SERIAL PRIMARY KEY, section_id VARCHAR(50) UNIQUE NOT NULL, name VARCHAR(50) NOT NULL, position INTEGER NOT NULL);")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func (r *Resolver) CreateNewListDB(name string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sqstm, err = r.DB.Prepare("INSERT INTO " + name + "_sections(id SERIAL PRIMARY KEY, section_id VARCHAR(50) UNIQUE NOT NULL, title VARCHAR(50) NOT NULL, section_order INTEGER NOT NULL);")
+	sqstm, err = r.DB.Prepare("INSERT INTO " + name + "_sections(section_id, name, position) VALUES('section-0', 'Unsorted', 0);")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -187,32 +187,53 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input NewItem) (*Item
 	}
 	return &Item{ID: input.ID}, nil
 }
-func (r *mutationResolver) DeleteItem(ctx context.Context, id string) (*Item, error) {
+func (r *mutationResolver) DeleteItem(ctx context.Context, input DeleteItem) (*Item, error) {
 
-	// log.Println("UpdateItem")
-	// user, ok := auth.FromContext(ctx)
-	// if !ok {
-	// log.Fatalf("No user in context\n")
-	// }
-	// access, _ := r.AccessAllowed(user.UID, input.Table)
-	// if !access {
-	// log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
-	// }
-	// log.Println("Access granted!")
-	// query := "DELETE FROM " + input.Table + "_items WHERE item_id = '" + id + "';"
-	// sqstm, err := r.DB.Prepare(query)
-	// if err != nil {
-	// log.Fatal(err)
-	// }
-	// _, err = sqstm.Exec(input.ID)
-	// if err != nil {
-	// log.Fatal(err)
-	// }
-	// return &Item{ID: input.ID}, nil
-	panic("not implemented")
+	log.Println("UpdateItem")
+	user, ok := auth.FromContext(ctx)
+	if !ok {
+		log.Fatalf("No user in context\n")
+	}
+	access, _ := r.AccessAllowed(user.UID, input.Table)
+	if !access {
+		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
+	}
+	log.Println("Access granted!")
+	query := "DELETE FROM " + input.Table + "_items WHERE item_id = '" + input.ID + "';"
+	sqstm, err := r.DB.Prepare(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = sqstm.Exec()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &Item{ID: input.ID}, nil
+
 }
 func (r *mutationResolver) CreateSection(ctx context.Context, input *NewSection) (*Section, error) {
-	panic("not implemented")
+	log.Println("CreateSection")
+	user, ok := auth.FromContext(ctx)
+	if !ok {
+		log.Fatalf("No user in context\n")
+	}
+	access, _ := r.AccessAllowed(user.UID, input.Table)
+	if !access {
+		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
+	}
+	log.Println("Access granted!")
+
+	query := "INSERT INTO " + input.Table + "_sections(section_id, name, position) VALUES($1,$2,$3) RETURNING id"
+	sqstm, err := r.DB.Prepare(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("input: %v, Position %v", input, input.Position)
+	_, err = sqstm.Exec(input.ID, input.Name, input.Position)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &Section{ID: input.ID}, nil
 }
 func (r *mutationResolver) UpdateSection(ctx context.Context, input *NewSection) (*Section, error) {
 	panic("not implemented")
