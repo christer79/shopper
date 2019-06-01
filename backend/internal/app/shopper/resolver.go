@@ -33,14 +33,6 @@ func (r *Resolver) DeleteListsDB(name string) {
 
 func (r *Resolver) CreateNewListDB(name string) {
 
-	//  id: ID!
-	//  name: String!
-	//  amount: Float
-	//  unit: String
-	//  section: String
-	//  checked: Boolean
-	//  deleted: Boolean
-	//  position: Int
 	sqstm, err := r.DB.Prepare("CREATE TABLE " + name + "_items(id SERIAL PRIMARY KEY, item_id VARCHAR(50) UNIQUE NOT NULL, name VARCHAR (50) NOT NULL, amount FLOAT8 NOT NULL, unit VARCHAR (50) NOT NULL, section VARCHAR (50) NOT NULL,  checked BOOL NOT NULL,  deleted BOOL NOT NULL,  position INT NOT NULL);")
 	if err != nil {
 		log.Fatal(err)
@@ -189,7 +181,7 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input NewItem) (*Item
 }
 func (r *mutationResolver) DeleteItem(ctx context.Context, input DeleteItem) (*Item, error) {
 
-	log.Println("UpdateItem")
+	log.Println("DeleteItem")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
@@ -239,7 +231,28 @@ func (r *mutationResolver) UpdateSection(ctx context.Context, input *NewSection)
 	panic("not implemented")
 }
 func (r *mutationResolver) DeleteSection(ctx context.Context, input DeleteSection) (*Section, error) {
-	panic("not implemented")
+
+	log.Println("DeleteSection")
+	user, ok := auth.FromContext(ctx)
+	if !ok {
+		log.Fatalf("No user in context\n")
+	}
+	access, _ := r.AccessAllowed(user.UID, input.Table)
+	if !access {
+		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
+	}
+	log.Println("Access granted!")
+	query := "DELETE FROM " + input.Table + "_sections WHERE section_id = '" + input.ID + "';"
+	sqstm, err := r.DB.Prepare(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = sqstm.Exec()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &Section{ID: input.ID}, nil
+
 }
 
 type queryResolver struct{ *Resolver }

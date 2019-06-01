@@ -165,6 +165,16 @@ function reducer(state = initialState, action) {
         return element;
       });
       return Object.assign({}, state, { items: newItems });
+    case "SECTION_SYNCED":
+      newSections = [...state.sections];
+      newSections.map(element => {
+        if (element.id === action.payload.id) {
+          element.synced = true;
+          element.isNew = false;
+        }
+        return element;
+      });
+      return Object.assign({}, state, { sections: newSections });
     case "TOGGLE_CHECKED":
       newItems = [...state.items];
 
@@ -214,21 +224,27 @@ function reducer(state = initialState, action) {
       return Object.assign({}, state, {
         sections: [
           ...state.sections,
-          { name: action.payload.section_name, id: id }
+          {
+            name: action.payload.section_name,
+            id: id,
+            position: state.sections.length,
+            isNew: true,
+            synced: false,
+            deleted: false
+          }
         ]
       });
     case "DELETE_SECTION":
-      newSections = { ...state.sections };
+      newSections = [...state.sections];
       newItems = [...state.items];
-
-      newSections = newSections.filter(section => {
-        return section.id !== action.payload.section_id;
-      });
-      newSections.section_order = newSections.section_order.filter(
-        section_id => {
-          return section_id !== action.payload.section_id;
+      newSections.map(element => {
+        if (element.id === action.payload.section_id) {
+          element.synced = false;
+          element.deleted = true;
         }
-      );
+        return element;
+      });
+
       newItems.map(item => {
         if (item.section === action.payload.section_id) {
           item.section = "section-0";
@@ -236,7 +252,6 @@ function reducer(state = initialState, action) {
         }
         return item;
       });
-      newSections.section_orderSynced = false;
       return Object.assign({}, state, {
         sections: newSections,
         items: newItems

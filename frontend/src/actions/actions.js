@@ -13,7 +13,6 @@ const TOGGLE_CHECKED = "TOGGLE_CHECKED";
 const DELETE_ITEM = "DELETE_ITEM";
 const SET_ITEMS = "SET_ITEMS";
 const ADD_ITEM = "ADD_ITEM";
-const ITEM_SYNCED = "ITEM_SYNCED";
 const TOGGLE_SHOW_EMPTY_LISTS = "TOGGLE_SHOW_EMPTY_LISTS";
 
 const SET_LIST_NAME = "SET_LIST_NAME";
@@ -68,8 +67,14 @@ export function itemOrderSynced() {
   return { type: ITEM_ORDER_SYNCED };
 }
 
+const ITEM_SYNCED = "ITEM_SYNCED";
 export function itemSynced(id) {
   return { type: ITEM_SYNCED, payload: { id: id } };
+}
+
+const SECTION_SYNCED = "SECTION_SYNCED";
+export function sectionSynced(id) {
+  return { type: SECTION_SYNCED, payload: { id: id } };
 }
 
 export function addItem(item) {

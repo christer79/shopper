@@ -3,7 +3,12 @@ import { connect } from "react-redux";
 
 import gql from "graphql-tag";
 
-import { setSections, setItems, itemSynced } from "./actions/actions";
+import {
+  setSections,
+  setItems,
+  itemSynced,
+  sectionSynced
+} from "./actions/actions";
 
 const LIST = gql`
   query getList($id: ID!) {
@@ -89,6 +94,37 @@ const UPDATE_ITEM = gql`
   }
 `;
 
+const DELETE_ITEM = gql`
+  mutation deleteItem($id: ID!, $table: ID!) {
+    deleteItem(input: { id: $id, table: $table }) {
+      id
+    }
+  }
+`;
+
+const CREATE_SECTION = gql`
+  mutation createSection(
+    $id: ID!
+    $name: String!
+    $position: Int!
+    $table: ID!
+  ) {
+    createSection(
+      input: { id: $id, name: $name, position: $position, table: $table }
+    ) {
+      id
+    }
+  }
+`;
+
+const DELETE_SECTION = gql`
+  mutation deleteSection($id: ID!, $table: ID!) {
+    deleteSection(input: { id: $id, table: $table }) {
+      id
+    }
+  }
+`;
+
 function mapStateToProps(state) {
   return {
     sections: state.sections,
@@ -100,7 +136,8 @@ function mapStateToProps(state) {
 const mapDispatchToProps = {
   setSections,
   setItems,
-  itemSynced
+  itemSynced,
+  sectionSynced
 };
 
 class Api extends React.Component {
@@ -113,10 +150,49 @@ class Api extends React.Component {
 
   syncStateWithServer() {
     console.log("syncStateWithServer");
+
+    // SYNC SECTIONS
+    this.props.sections
+      .filter(section => section.synced === false)
+      .forEach(section => {
+        console.log("Unsynced section: ", section);
+        if (section.isNew && section.isNew === true) {
+          this.props.client
+            .mutate({
+              mutation: CREATE_SECTION,
+              variables: {
+                id: section.id,
+                name: section.name,
+                position: section.position,
+                table: this.props.selectedList
+              }
+            })
+            .then(data => {
+              console.log(data.data.createSection.id);
+              this.props.sectionSynced(data.data.createSection.id);
+            });
+        }
+        if (section.deleted && section.synced === false) {
+          this.props.client
+            .mutate({
+              mutation: DELETE_SECTION,
+              variables: {
+                id: section.id,
+                table: this.props.selectedList
+              }
+            })
+            .then(data => {
+              console.log(data.data.deleteSection.id);
+              this.props.sectionSynced(data.data.deleteSection.id);
+            });
+        }
+      });
+
+    // SYNC ITEMS
     this.props.items
       .filter(item => item.synced === false)
       .forEach(item => {
-        console.log("Unsynced item:", item);
+        console.log("Unsynced item: ", item);
         if (item.isNew && item.isNew === true) {
           this.props.client
             .mutate({
@@ -143,11 +219,12 @@ class Api extends React.Component {
             .mutate({
               mutation: DELETE_ITEM,
               variables: {
-                id: item.id
+                id: item.id,
+                table: this.props.selectedList
               }
             })
             .then(data => {
-              this.props.itemSynced(data.data.createItem.id);
+              this.props.itemSynced(data.data.deleteItem.id);
             });
         } else if (item.synced === false) {
           this.props.client
@@ -181,8 +258,10 @@ class Api extends React.Component {
         variables: { id: this.props.selectedList }
       })
       .then(data => {
-        this.props.setItems(data.data.list.items);
-        this.props.setSections(data.data.list.sections);
+        this.props.setItems(data.data.list.items ? data.data.list.items : []);
+        this.props.setSections(
+          data.data.list.sections ? data.data.list.sections : []
+        );
       });
   }
 
