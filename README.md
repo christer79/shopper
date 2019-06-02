@@ -38,7 +38,7 @@ export REACT_APP_MOMENTS_GRAPHQL_WEBSOCKET_URL="ws://localhost:3500/graphql"
     }
 
 
-    query GetLists {
+    query GETLISTS {
       lists {
         id
       }
@@ -50,3 +50,12 @@ export REACT_APP_MOMENTS_GRAPHQL_WEBSOCKET_URL="ws://localhost:3500/graphql"
         id
       }
     }
+
+    query GETLIST {
+      list(id: "_bkwxcimkj") {
+        name
+        id
+        sections { name, id, position }
+          items { id, name }
+        }
+      }
