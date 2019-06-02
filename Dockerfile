@@ -8,7 +8,6 @@ RUN apk update && apk upgrade && apk add --no-cache git
 ENV APP_DIR=shopper/backend/
 RUN mkdir -p $APP_DIR
 COPY ./backend $APP_DIR
-COPY ./backend $APP_DIR
 WORKDIR $APP_DIR
 CMD ["go", "test"]
 
@@ -16,10 +15,10 @@ CMD ["go", "test"]
 # Development image backend
 # ------------------------------------------------------------------------------
 FROM backend_test_img AS dev_img
-RUN ls
+RUN mkdir /config
+RUN cp -r /go/shopper/backend/config/* /config/
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
    go build -gcflags "all=-N -l" -o /shopper cmd/main.go
-
 ENTRYPOINT /shopper
 
 # ------------------------------------------------------------------------------
@@ -40,6 +39,7 @@ RUN find /usr/src/app | grep -v node_modules
 # ------------------------------------------------------------------------------
 FROM alpine:3.7 as prod_img
 COPY --from=dev_img /shopper /
+COPY --from=dev_img /config /config
 COPY --from=frontend-build /usr/src/app/build /build/
 EXPOSE 3500
 ENTRYPOINT /shopper

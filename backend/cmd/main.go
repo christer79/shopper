@@ -35,8 +35,11 @@ func main() {
 		panic(err)
 	}
 	log.Printf("%v\n", fbapp)
+	DB_URL := os.Getenv("DATABASE_URL")
+	log.Printf("DB_URL: \"%s\"\n",DB_URL)
 
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+
+	db, err := sql.Open("postgres", DB_URL)
 	if err != nil {
 		log.Fatalf("Error opening database: %q", err)
 		panic(err)
@@ -66,7 +69,7 @@ func main() {
 	router.HandleFunc("/playground", handler.Playground("GraphQL playground", "/graphql")).Methods("GET")
 	router.Handle("/graphql", c.Handler(authFunc(handler.GraphQL(app.NewExecutableSchema(app.Config{Resolvers: &app.Resolver{DB: db}}))))).Methods("GET", "POST", "OPTIONS")
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("build/static"))))
-	router.PathPrefix("/web").Handler(http.StripPrefix("/", http.FileServer(http.Dir("build"))))
+	router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("build"))))
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 
