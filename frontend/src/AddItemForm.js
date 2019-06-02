@@ -36,7 +36,7 @@ class AddItemForm extends Component {
     } else {
       // find correct item in itemSuggestions
       const suggested = this.props.itemSuggestions.find(
-        suggestion => suggestion.item === event.label
+        suggestion => suggestion.name === event.label
       );
 
       // find in sections

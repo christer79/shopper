@@ -7,9 +7,19 @@ import {
   setSections,
   setItems,
   itemSynced,
-  sectionSynced
+  sectionSynced,
+  setItemSuggestions
 } from "./actions/actions";
 
+const SUGGESTIONS = gql`
+  query getSuggestions {
+    suggestions {
+      name
+      section
+      unit
+    }
+  }
+`;
 const LIST = gql`
   query getList($id: ID!) {
     list(id: $id) {
@@ -116,7 +126,20 @@ const CREATE_SECTION = gql`
     }
   }
 `;
-
+const UPDATE_SECTION = gql`
+  mutation updateSection(
+    $id: ID!
+    $name: String!
+    $position: Int!
+    $table: ID!
+  ) {
+    updateSection(
+      input: { id: $id, name: $name, position: $position, table: $table }
+    ) {
+      id
+    }
+  }
+`;
 const DELETE_SECTION = gql`
   mutation deleteSection($id: ID!, $table: ID!) {
     deleteSection(input: { id: $id, table: $table }) {
@@ -137,7 +160,8 @@ const mapDispatchToProps = {
   setSections,
   setItems,
   itemSynced,
-  sectionSynced
+  sectionSynced,
+  setItemSuggestions
 };
 
 class Api extends React.Component {
@@ -168,7 +192,6 @@ class Api extends React.Component {
               }
             })
             .then(data => {
-              console.log(data.data.createSection.id);
               this.props.sectionSynced(data.data.createSection.id);
             });
         }
@@ -182,8 +205,21 @@ class Api extends React.Component {
               }
             })
             .then(data => {
-              console.log(data.data.deleteSection.id);
               this.props.sectionSynced(data.data.deleteSection.id);
+            });
+        } else if (section.synced === false) {
+          this.props.client
+            .mutate({
+              mutation: UPDATE_SECTION,
+              variables: {
+                id: section.id,
+                name: section.name,
+                position: section.position,
+                table: this.props.selectedList
+              }
+            })
+            .then(data => {
+              this.props.sectionSynced(data.data.updateSection.id);
             });
         }
       });
@@ -210,7 +246,6 @@ class Api extends React.Component {
               }
             })
             .then(data => {
-              console.log(data.data.createItem.id);
               this.props.itemSynced(data.data.createItem.id);
             });
         }
@@ -243,7 +278,6 @@ class Api extends React.Component {
               }
             })
             .then(data => {
-              console.log(data.data.updateItem.id);
               this.props.itemSynced(data.data.updateItem.id);
             });
         }
@@ -251,6 +285,15 @@ class Api extends React.Component {
   }
 
   fetchFromRemote() {
+    this.props.client
+      .query({
+        query: SUGGESTIONS
+      })
+      .then(data => {
+        this.props.setItemSuggestions(
+          data.data.suggestions ? data.data.suggestions : []
+        );
+      });
     this.props.client
       .query({
         query: LIST,

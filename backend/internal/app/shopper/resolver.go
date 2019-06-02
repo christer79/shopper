@@ -32,7 +32,6 @@ func (r *Resolver) DeleteListsDB(name string) {
 }
 
 func (r *Resolver) CreateNewListDB(name string) {
-
 	sqstm, err := r.DB.Prepare("CREATE TABLE " + name + "_items(id SERIAL PRIMARY KEY, item_id VARCHAR(50) UNIQUE NOT NULL, name VARCHAR (50) NOT NULL, amount FLOAT8 NOT NULL, unit VARCHAR (50) NOT NULL, section VARCHAR (50) NOT NULL,  checked BOOL NOT NULL,  deleted BOOL NOT NULL,  position INT NOT NULL);")
 	if err != nil {
 		log.Fatal(err)
@@ -56,6 +55,84 @@ func (r *Resolver) CreateNewListDB(name string) {
 	_, err = sqstm.Exec()
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func (r *Resolver) CreateNewSuggestionTable(user string) {
+	query := "CREATE TABLE _" + user + "_suggestions(id SERIAL PRIMARY KEY, item_name VARCHAR(50) UNIQUE NOT NULL, section_name VARCHAR (50) NOT NULL, unit VARCHAR(50) NOT NULL);"
+	log.Printf("CreateNewSuggestionTable: %s", query)
+	sqstm, err := r.DB.Prepare(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = sqstm.Exec()
+	if err != nil {
+		log.Printf("Ignoring: %v\n", err)
+	}
+}
+
+func (r *Resolver) GetSectionName(table, section_id string) string {
+	query := "SELECT name FROM " + table + "_sections WHERE section_id = '" + section_id + "';"
+	rows, err := r.DB.Query(query)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var section_name string
+	for rows.Next() {
+		err := rows.Scan(&section_name)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	}
+	return section_name
+}
+func (r *Resolver) AddSuggestion(_user, _item_name, _section_id, _unit, _table *string) {
+	// CHECK IF IT EXISTS
+	log.Printf("Add suggestion\n")
+	user := *_user
+	item_name := *_item_name
+	section_id := *_section_id
+	unit := *_unit
+	table := *_table
+
+	section_name := r.GetSectionName(table, section_id)
+
+	query := "SELECT item_name FROM _" + user + "_suggestions WHERE item_name = '" + item_name + "';"
+	log.Printf("AddSuggestion Query: %s\n", query)
+	rows, err := r.DB.Query(query)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	suggestion_exists := false
+	for rows.Next() {
+		log.Printf("Suggestion for %s exists", item_name)
+		suggestion_exists = true
+	}
+	if suggestion_exists {
+		query := "UPDATE _" + user + "_suggestions SET(section_name, unit) = ($1, $2) WHERE item_name = '" + item_name + "';"
+		log.Printf("AddSuggestion Query: %s\n", query)
+		sqstm, err := r.DB.Prepare(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = sqstm.Exec(section_name, unit)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		query := "INSERT INTO _" + user + "_suggestions(item_name, section_name, unit) VALUES($1,$2,$3);"
+		log.Printf("AddSuggestion Query: %s\n", query)
+		sqstm, err := r.DB.Prepare(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = sqstm.Exec(item_name, section_name, unit)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -99,6 +176,7 @@ func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*Lis
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
+	r.CreateNewSuggestionTable(user.UID)
 	var list_owner = true
 	sqstm, err := r.DB.Prepare("INSERT INTO lists(list_id,list_name, user_uid, owner) VALUES($1,$2,$3,$4) RETURNING id")
 	if err != nil {
@@ -155,6 +233,7 @@ func (r *mutationResolver) CreateItem(ctx context.Context, input *NewItem) (*Ite
 	if err != nil {
 		log.Fatal(err)
 	}
+	r.AddSuggestion(&user.UID, &input.Name, input.Section, input.Unit, &input.Table)
 	return &Item{ID: input.ID}, nil
 }
 func (r *mutationResolver) UpdateItem(ctx context.Context, input NewItem) (*Item, error) {
@@ -177,6 +256,8 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input NewItem) (*Item
 	if err != nil {
 		log.Fatal(err)
 	}
+	r.AddSuggestion(&user.UID, &input.Name, input.Section, input.Unit, &input.Table)
+
 	return &Item{ID: input.ID}, nil
 }
 func (r *mutationResolver) DeleteItem(ctx context.Context, input DeleteItem) (*Item, error) {
@@ -228,7 +309,26 @@ func (r *mutationResolver) CreateSection(ctx context.Context, input *NewSection)
 	return &Section{ID: input.ID}, nil
 }
 func (r *mutationResolver) UpdateSection(ctx context.Context, input *NewSection) (*Section, error) {
-	panic("not implemented")
+	log.Println("UpdateSection")
+	user, ok := auth.FromContext(ctx)
+	if !ok {
+		log.Fatalf("No user in context\n")
+	}
+	access, _ := r.AccessAllowed(user.UID, input.Table)
+	if !access {
+		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
+	}
+	log.Println("Access granted!")
+	query := "UPDATE  " + input.Table + "_sections SET( name, position) = ($1, $2) WHERE section_id = '" + input.ID + "';"
+	sqstm, err := r.DB.Prepare(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = sqstm.Exec(input.Name, input.Position)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &Section{ID: input.ID}, nil
 }
 func (r *mutationResolver) DeleteSection(ctx context.Context, input DeleteSection) (*Section, error) {
 
@@ -365,7 +465,30 @@ func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
 
 }
 func (r *queryResolver) Suggestions(ctx context.Context) ([]*Suggestion, error) {
-	panic("not implemented")
+	log.Println("DeleteSection")
+	user, ok := auth.FromContext(ctx)
+	if !ok {
+		log.Fatalf("No user in context\n")
+	}
+	query := "SELECT * FROM _" + user.UID + "_suggestions;"
+	rows, err := r.DB.Query(query)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var suggestions []*Suggestion
+	for rows.Next() {
+		suggestion := new(Suggestion)
+		var id int
+		err := rows.Scan(&id, &suggestion.Name, &suggestion.Section, &suggestion.Unit)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		suggestions = append(suggestions, suggestion)
+	}
+	return suggestions, nil
 }
 
 type subscriptionResolver struct{ *Resolver }
