@@ -5,9 +5,5 @@ setup:
 build:
   docker:
     web: Dockerfile
-release:
-  command:
-    - echo "Releasing"
-  image: web
 run:
   web: ./shopper

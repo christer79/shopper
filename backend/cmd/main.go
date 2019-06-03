@@ -72,7 +72,7 @@ func main() {
 	authFunc := auth.JWTHandler("config/serviceAccountKey.json")
 	router := mux.NewRouter()
 	router.HandleFunc("/playground", handler.Playground("GraphQL playground", "/graphql")).Methods("GET")
-	router.Handle("/graphql", c.Handler(authFunc(handler.GraphQL(app.NewExecutableSchema(app.Config{Resolvers: &app.Resolver{DB: db}}))))).Methods("GET", "POST", "OPTIONS")
+	router.Handle("/graphql", c.Handler(authFunc(handler.GraphQL(app.NewExecutableSchema(app.Config{Resolvers: &app.Resolver{DB: db, mysql_mutex: &sync.Mutex{}}}))))).Methods("GET", "POST", "OPTIONS")
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("build/static"))))
 	router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("build"))))
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
