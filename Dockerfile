@@ -38,6 +38,7 @@ RUN find /usr/src/app | grep -v node_modules
 # Production image
 # ------------------------------------------------------------------------------
 FROM alpine:3.7 as prod_img
+RUN apk add ca-certificates
 COPY --from=dev_img /shopper /
 COPY --from=dev_img /config /config
 COPY --from=frontend-build /usr/src/app/build /build/

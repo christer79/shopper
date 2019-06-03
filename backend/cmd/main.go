@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/rs/cors"
 
@@ -44,9 +45,13 @@ func main() {
 		log.Fatalf("Error opening database: %q", err)
 		panic(err)
 	}
-	err = db.Ping()
-	if err != nil {
-		panic(err)
+	for {
+		err = db.Ping()
+		if err == nil {
+			break
+		}
+		log.Printf("Failed to connect to database %v\n",err)
+		time.Sleep(5* time.Second)
 	}
 
 	port := os.Getenv("PORT")
