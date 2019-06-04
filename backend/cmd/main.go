@@ -38,7 +38,7 @@ func main() {
 	}
 	log.Printf("%v\n", fbapp)
 	DB_URL := os.Getenv("DATABASE_URL")
-	log.Printf("DB_URL: \"%s\"\n", DB_URL)
+	log.Printf("DATABASE_URL: \"%s\"\n", DB_URL)
 
 	db, err := sql.Open("postgres", DB_URL)
 	if err != nil {
