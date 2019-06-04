@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"sync"
 
 	"github.com/christer79/shopper/backend/internal/app/auth"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 type Resolver struct {
-	DB *sql.DB
+	DB          *sql.DB
+	mysql_mutex *sync.Mutex
 }
 
 func (r *Resolver) DeleteListsDB(name string) {
