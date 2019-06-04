@@ -7,10 +7,11 @@ import (
 	"sync"
 
 	"github.com/christer79/shopper/backend/internal/app/auth"
-) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
+)
+
 type Resolver struct {
-	DB          *sql.DB
-	mysql_mutex *sync.Mutex
+	DB        *sql.DB
+	SQL_mutex *sync.Mutex
 }
 
 func (r *Resolver) DeleteListsDB(name string) {
@@ -103,6 +104,7 @@ func (r *Resolver) AddSuggestion(_user, _item_name, _section_id, _unit, _table *
 
 	query := "SELECT item_name FROM _" + user + "_suggestions WHERE item_name = '" + item_name + "';"
 	log.Printf("AddSuggestion Query: %s\n", query)
+	r.SQL_mutex.Lock()
 	rows, err := r.DB.Query(query)
 	defer rows.Close()
 	if err != nil {
@@ -136,6 +138,7 @@ func (r *Resolver) AddSuggestion(_user, _item_name, _section_id, _unit, _table *
 			log.Fatal(err)
 		}
 	}
+	r.SQL_mutex.Unlock()
 }
 
 func (r Resolver) AccessAllowed(uid, table string) (bool, error) {

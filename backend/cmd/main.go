@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/rs/cors"
@@ -37,8 +38,7 @@ func main() {
 	}
 	log.Printf("%v\n", fbapp)
 	DB_URL := os.Getenv("DATABASE_URL")
-	log.Printf("DB_URL: \"%s\"\n",DB_URL)
-
+	log.Printf("DB_URL: \"%s\"\n", DB_URL)
 
 	db, err := sql.Open("postgres", DB_URL)
 	if err != nil {
@@ -50,8 +50,8 @@ func main() {
 		if err == nil {
 			break
 		}
-		log.Printf("Failed to connect to database %v\n",err)
-		time.Sleep(5* time.Second)
+		log.Printf("Failed to connect to database %v\n", err)
+		time.Sleep(5 * time.Second)
 	}
 
 	port := os.Getenv("PORT")
@@ -72,7 +72,7 @@ func main() {
 	authFunc := auth.JWTHandler("config/serviceAccountKey.json")
 	router := mux.NewRouter()
 	router.HandleFunc("/playground", handler.Playground("GraphQL playground", "/graphql")).Methods("GET")
-	router.Handle("/graphql", c.Handler(authFunc(handler.GraphQL(app.NewExecutableSchema(app.Config{Resolvers: &app.Resolver{DB: db, mysql_mutex: &sync.Mutex{}}}))))).Methods("GET", "POST", "OPTIONS")
+	router.Handle("/graphql", c.Handler(authFunc(handler.GraphQL(app.NewExecutableSchema(app.Config{Resolvers: &app.Resolver{DB: db, SQL_mutex: &sync.Mutex{}}}))))).Methods("GET", "POST", "OPTIONS")
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("build/static"))))
 	router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("build"))))
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
