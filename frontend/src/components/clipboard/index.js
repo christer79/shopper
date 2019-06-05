@@ -24,7 +24,7 @@ class Clipboarder extends React.Component {
       const text = await navigator.clipboard.readText();
       text.split("\n").forEach(line => {
         line !== ""
-          ? this.props.addItem({ item: line })
+          ? this.props.addItem({ name: line })
           : console.log("Empty line");
       });
     });
@@ -33,7 +33,7 @@ class Clipboarder extends React.Component {
     navigator.clipboard.readText().then(text => {
       text.split("\n").forEach(line => {
         line !== ""
-          ? this.props.addItem({ item: line })
+          ? this.props.addItem({ name: line })
           : console.log("Empty line");
       });
     });
