@@ -117,6 +117,8 @@ function reducer(state = initialState, action) {
           Math.random()
             .toString(36)
             .substr(2, 9);
+        item.amount = 0.0;
+        item.unit = "st";
         item.checked = false;
         item.deleted = false;
         item.isNew = true;
