@@ -64,11 +64,11 @@ class App extends Component {
   }
 
   httpLink = new HttpLink({
-    uri: process.env.REACT_APP_MOMENTS_GRAPHQL_HTTP_URL
+    uri: process.env.REACT_APP_SHOPPER_GRAPHQL_HTTP_URL
   });
 
   wsLink = new WebSocketLink({
-    uri: process.env.REACT_APP_MOMENTS_GRAPHQL_WEBSOCKET_URL,
+    uri: process.env.REACT_APP_SHOPPER_GRAPHQL_WEBSOCKET_URL,
     options: {
       lazy: true,
       reconnect: true,
