@@ -363,8 +363,8 @@ func (r *mutationResolver) DeleteSection(ctx context.Context, input DeleteSectio
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
-	log.Println("Query: Lists")
-	query := "CREATE TABLE lists(id SERIAL PRIMARY KEY, list_id VARCHAR(50) NOT NULL, list_name VARCHAR(50) NOT NULL, user_uid VARCHAR(50), owner BOOLEAN);"
+
+	query:= "CREATE TABLE lists(id SERIAL PRIMARY KEY, list_id VARCHAR(50) NOT NULL, list_name VARCHAR(50) NOT NULL, user_uid VARCHAR(50), owner BOOLEAN);"
 	r.DB.Query(query)
 
 	log.Println("In lists")
@@ -473,8 +473,8 @@ func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
 	return &List{Name: lists[0].Name, ID: id, Sections: sections, Items: items}, nil
 
 }
-func (r *queryResolver) Suggestions(ctx context.Context, list string) ([]*Suggestion, error) {
-	log.Println("Suggestions")
+func (r *queryResolver) Suggestions(ctx context.Context) ([]*Suggestion, error) {
+	log.Println("DeleteSection")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")

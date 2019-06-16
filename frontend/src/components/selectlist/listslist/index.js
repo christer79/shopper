@@ -39,8 +39,8 @@ class ListsList extends React.Component {
               <List key={list.id} name={list.name} id={list.id} />
             ))
           ) : (
-              <div>No lists yet!</div>
-            );
+            <div>No lists yet!</div>
+          );
         }}
       </Query>
     );

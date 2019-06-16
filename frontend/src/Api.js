@@ -12,12 +12,12 @@ import {
 } from "./actions/actions";
 
 const SUGGESTIONS = gql`
-  query getSuggestions($list: ID!) {
-    suggestions(list: $list) {
-          name
+  query getSuggestions {
+    suggestions {
+      name
       section
       unit
-  }
+    }
   }
 `;
 const LIST = gql`
@@ -287,8 +287,7 @@ class Api extends React.Component {
   fetchFromRemote() {
     this.props.client
       .query({
-        query: SUGGESTIONS,
-        variables: { list: this.props.selectedList }
+        query: SUGGESTIONS
       })
       .then(data => {
         this.props.setItemSuggestions(
@@ -304,17 +303,17 @@ class Api extends React.Component {
         this.props.setItems(
           data.data.list.items
             ? data.data.list.items.map(entry => {
-              entry.synced = true;
-              return entry;
-            })
+                entry.synced = true;
+                return entry;
+              })
             : []
         );
         this.props.setSections(
           data.data.list.sections
             ? data.data.list.sections.map(entry => {
-              entry.synced = true;
-              return entry;
-            })
+                entry.synced = true;
+                return entry;
+              })
             : []
         );
       });

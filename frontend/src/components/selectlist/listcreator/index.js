@@ -3,8 +3,8 @@ import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
 
 const CREATE_LIST = gql`
-  mutation CreateList($id: ID!, $name: String!, $listtype: String!) {
-    createList(input: { id: $id, name: $name, listtype: $listtype}) {
+  mutation CreateList($id: ID!, $name: String!) {
+    createList(input: { id: $id, name: $name }) {
       name
       id
     }
@@ -37,8 +37,7 @@ function ListCreator() {
                     Math.random()
                       .toString(36)
                       .substr(2, 9),
-                  name: form.name,
-                  listtype: "shopping"
+                  name: form.name
                 }
               });
               setValues({ name: "" });

@@ -19,12 +19,11 @@ type Suggestion {
   name: String!
   unit: String!
   section: String!
- }
+}
 
 type List {
   name: String!
   id: ID!
-  listtype: String!
   owner: Boolean!
   sections: [Section!]
   items: [Item!]
@@ -33,7 +32,7 @@ type List {
 type Query {
   lists: [List!]
   list(id: ID!): List!
-  suggestions(list: ID!): [Suggestion!]
+  suggestions: [Suggestion!]
 }
 
 input NewItem {
@@ -57,7 +56,6 @@ input NewSection {
 
 input NewList {
   name: String!
-  listtype: String!
   id: ID!
 }
 input DeleteItem {

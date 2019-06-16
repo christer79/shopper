@@ -58,7 +58,6 @@ type ComplexityRoot struct {
 	List struct {
 		ID       func(childComplexity int) int
 		Items    func(childComplexity int) int
-		Listtype func(childComplexity int) int
 		Name     func(childComplexity int) int
 		Owner    func(childComplexity int) int
 		Sections func(childComplexity int) int
@@ -78,7 +77,7 @@ type ComplexityRoot struct {
 	Query struct {
 		List        func(childComplexity int, id string) int
 		Lists       func(childComplexity int) int
-		Suggestions func(childComplexity int, list string) int
+		Suggestions func(childComplexity int) int
 	}
 
 	Section struct {
@@ -112,7 +111,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Lists(ctx context.Context) ([]*List, error)
 	List(ctx context.Context, id string) (*List, error)
-	Suggestions(ctx context.Context, list string) ([]*Suggestion, error)
+	Suggestions(ctx context.Context) ([]*Suggestion, error)
 }
 type SubscriptionResolver interface {
 	ItemChanged(ctx context.Context, input SubscritionInput) (<-chan *Item, error)
@@ -203,13 +202,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.List.Items(childComplexity), true
-
-	case "List.listtype":
-		if e.complexity.List.Listtype == nil {
-			break
-		}
-
-		return e.complexity.List.Listtype(childComplexity), true
 
 	case "List.name":
 		if e.complexity.List.Name == nil {
@@ -352,12 +344,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_suggestions_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Suggestions(childComplexity, args["list"].(string)), true
+		return e.complexity.Query.Suggestions(childComplexity), true
 
 	case "Section.id":
 		if e.complexity.Section.ID == nil {
@@ -552,12 +539,11 @@ type Suggestion {
   name: String!
   unit: String!
   section: String!
- }
+}
 
 type List {
   name: String!
   id: ID!
-  listtype: String!
   owner: Boolean!
   sections: [Section!]
   items: [Item!]
@@ -566,7 +552,7 @@ type List {
 type Query {
   lists: [List!]
   list(id: ID!): List!
-  suggestions(list: ID!): [Suggestion!]
+  suggestions: [Suggestion!]
 }
 
 input NewItem {
@@ -590,7 +576,6 @@ input NewSection {
 
 input NewList {
   name: String!
-  listtype: String!
   id: ID!
 }
 input DeleteItem {
@@ -765,20 +750,6 @@ func (ec *executionContext) field_Query_list_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_suggestions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["list"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["list"] = arg0
 	return args, nil
 }
 
@@ -1092,33 +1063,6 @@ func (ec *executionContext) _List_id(ctx context.Context, field graphql.Collecte
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _List_listtype(ctx context.Context, field graphql.CollectedField, obj *List) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object:   "List",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Listtype, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _List_owner(ctx context.Context, field graphql.CollectedField, obj *List) graphql.Marshaler {
@@ -1512,17 +1456,10 @@ func (ec *executionContext) _Query_suggestions(ctx context.Context, field graphq
 		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_suggestions_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Suggestions(rctx, args["list"].(string))
+		return ec.resolvers.Query().Suggestions(rctx)
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -2775,12 +2712,6 @@ func (ec *executionContext) unmarshalInputNewList(ctx context.Context, v interfa
 			if err != nil {
 				return it, err
 			}
-		case "listtype":
-			var err error
-			it.Listtype, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "id":
 			var err error
 			it.ID, err = ec.unmarshalNID2string(ctx, v)
@@ -2923,11 +2854,6 @@ func (ec *executionContext) _List(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "id":
 			out.Values[i] = ec._List_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "listtype":
-			out.Values[i] = ec._List_listtype(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
