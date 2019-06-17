@@ -24,6 +24,22 @@ Generated with create-react-app
 export REACT_APP_MOMENTS_GRAPHQL_HTTP_URL="http://localhost:3500/graphql"
 export REACT_APP_MOMENTS_GRAPHQL_WEBSOCKET_URL="ws://localhost:3500/graphql"
 
+## Postgres db
+
+### Dump postgres db
+
+    docker exec <container id> pg_dump -U postgres shopping
+
+### Clear database
+
+    docker exec dfced77d0ee0 psql -U postgres -c "DROP DATABASE shopping"
+    docker exec dfced77d0ee0 psql -U postgres -c "CREATE DATABASE shopping"
+
+### Reload db from file
+
+    docker cp ../v1_dump.sql dfced77d0ee0:/
+    docker exec dfced77d0ee0 psql -U postgres shopping -f /v1_dump.sql
+
 ## Docker
 
 ## Playground

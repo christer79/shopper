@@ -3,8 +3,8 @@ import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
 
 const CREATE_LIST = gql`
-  mutation CreateList($id: ID!, $name: String!) {
-    createList(input: { id: $id, name: $name }) {
+  mutation CreateList($id: ID!, $name: String!, $listtype: String!) {
+    createList(input: { id: $id, name: $name, listtype: $listtype}) {
       name
       id
     }
@@ -13,10 +13,11 @@ const CREATE_LIST = gql`
 
 function ListCreator() {
   const [form, setValues] = React.useState({
-    name: ""
+    name: "", listtype: "shopping"
   });
 
   const updateField = e => {
+    console.log("Updating field: ", e.target.name, " with: ", e.target.value)
     setValues({
       ...form,
       [e.target.name]: e.target.value
@@ -37,13 +38,15 @@ function ListCreator() {
                     Math.random()
                       .toString(36)
                       .substr(2, 9),
-                  name: form.name
+                  name: form.name,
+                  listtype: form.listtype
                 }
               });
               setValues({ name: "" });
             }}
             noValidate
             autoComplete="off"
+            id="createlist"
           >
             <input
               type="text"
@@ -51,6 +54,10 @@ function ListCreator() {
               value={form.name}
               onChange={updateField}
             />
+            <select name="listtype" form="createlist" onChange={updateField}>
+              <option value="shopping">shopping</option>
+              <option value="pantry">pantry</option>
+            </select>
             <input type="submit" name="Add" />
           </form>
         )}

@@ -61,8 +61,9 @@ func (r *Resolver) CreateNewListDB(name string) {
 	}
 }
 
-func (r *Resolver) CreateNewSuggestionTable(user string) {
-	query := "CREATE TABLE _" + user + "_suggestions(id SERIAL PRIMARY KEY, item_name VARCHAR(50) UNIQUE NOT NULL, section_name VARCHAR (50) NOT NULL, unit VARCHAR(50) NOT NULL);"
+func (r *Resolver) CreateNewSuggestionTable(user string, listType string) {
+	//TODO: Only try to create if it does not exits
+	query := "CREATE TABLE _" + user + "_" + listType + "_suggestions(id SERIAL PRIMARY KEY, item_name VARCHAR(50) UNIQUE NOT NULL, section_name VARCHAR (50) NOT NULL, unit VARCHAR(50) NOT NULL);"
 	log.Printf("CreateNewSuggestionTable: %s", query)
 	sqstm, err := r.DB.Prepare(query)
 	if err != nil {
@@ -72,6 +73,23 @@ func (r *Resolver) CreateNewSuggestionTable(user string) {
 	if err != nil {
 		log.Printf("Ignoring: %v\n", err)
 	}
+}
+
+func (r Resolver) GetListType(list_id string) string {
+	query := "SELECT list_type FROM lists WHERE list_id='" + list_id + "';"
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		log.Printf("Error %v for query: %v\n", err, query)
+		return "shopping"
+	}
+	var listType string
+	for rows.Next() {
+		err := rows.Scan(&listType)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return listType
 }
 
 func (r *Resolver) GetSectionName(table, section_id string) string {
@@ -102,7 +120,12 @@ func (r *Resolver) AddSuggestion(_user, _item_name, _section_id, _unit, _table *
 
 	section_name := r.GetSectionName(table, section_id)
 
-	query := "SELECT item_name FROM _" + user + "_suggestions WHERE item_name = '" + item_name + "';"
+	listType := r.GetListType(table)
+
+	log.Printf("Derived list type %v from list_id %v", listType, table)
+	suggestion_list := user + "_" + listType
+
+	query := "SELECT item_name FROM _" + suggestion_list + "_suggestions WHERE item_name = '" + item_name + "';"
 	log.Printf("AddSuggestion Query: %s\n", query)
 	r.SQL_mutex.Lock()
 	rows, err := r.DB.Query(query)
@@ -116,7 +139,7 @@ func (r *Resolver) AddSuggestion(_user, _item_name, _section_id, _unit, _table *
 		suggestion_exists = true
 	}
 	if suggestion_exists {
-		query := "UPDATE _" + user + "_suggestions SET(section_name, unit) = ($1, $2) WHERE item_name = '" + item_name + "';"
+		query := "UPDATE _" + suggestion_list + "_suggestions SET(section_name, unit) = ($1, $2) WHERE item_name = '" + item_name + "';"
 		log.Printf("AddSuggestion Query: %s\n", query)
 		sqstm, err := r.DB.Prepare(query)
 		if err != nil {
@@ -127,7 +150,7 @@ func (r *Resolver) AddSuggestion(_user, _item_name, _section_id, _unit, _table *
 			log.Fatal(err)
 		}
 	} else {
-		query := "INSERT INTO _" + user + "_suggestions(item_name, section_name, unit) VALUES($1,$2,$3);"
+		query := "INSERT INTO _" + suggestion_list + "_suggestions(item_name, section_name, unit) VALUES($1,$2,$3);"
 		log.Printf("AddSuggestion Query: %s\n", query)
 		sqstm, err := r.DB.Prepare(query)
 		if err != nil {
@@ -181,13 +204,15 @@ func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*Lis
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
-	r.CreateNewSuggestionTable(user.UID)
+	r.CreateNewSuggestionTable(user.UID, input.Listtype)
 	var list_owner = true
-	sqstm, err := r.DB.Prepare("INSERT INTO lists(list_id,list_name, user_uid, owner) VALUES($1,$2,$3,$4) RETURNING id")
+	query := "INSERT INTO lists(list_id,list_name, list_type, user_uid, owner) VALUES($1,$2,$3,$4,$5) RETURNING id"
+	log.Printf("query: %v\n", query)
+	sqstm, err := r.DB.Prepare(query)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = sqstm.Exec(input.ID, input.Name, user.UID, list_owner)
+	_, err = sqstm.Exec(input.ID, input.Name, input.Listtype, user.UID, list_owner)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -363,8 +388,8 @@ func (r *mutationResolver) DeleteSection(ctx context.Context, input DeleteSectio
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
-
-	query:= "CREATE TABLE lists(id SERIAL PRIMARY KEY, list_id VARCHAR(50) NOT NULL, list_name VARCHAR(50) NOT NULL, user_uid VARCHAR(50), owner BOOLEAN);"
+	log.Println("Query: Lists")
+	query := "CREATE TABLE lists(id SERIAL PRIMARY KEY, list_id VARCHAR(50) NOT NULL, list_name VARCHAR(50) NOT NULL, list_typ VARCHAR(50), user_uid VARCHAR(50), owner BOOLEAN);"
 	r.DB.Query(query)
 
 	log.Println("In lists")
@@ -473,13 +498,16 @@ func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
 	return &List{Name: lists[0].Name, ID: id, Sections: sections, Items: items}, nil
 
 }
-func (r *queryResolver) Suggestions(ctx context.Context) ([]*Suggestion, error) {
-	log.Println("DeleteSection")
+func (r *queryResolver) Suggestions(ctx context.Context, list string) ([]*Suggestion, error) {
+	log.Println("Suggestions")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
-	query := "SELECT * FROM _" + user.UID + "_suggestions;"
+
+	listType := r.GetListType(list)
+
+	query := "SELECT * FROM _" + user.UID + "_" + listType + "_suggestions;"
 	rows, err := r.DB.Query(query)
 	defer rows.Close()
 	if err != nil {
