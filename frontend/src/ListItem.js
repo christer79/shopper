@@ -5,14 +5,12 @@ import { connect } from "react-redux";
 import {
   increaseAmount,
   toggleChecked,
-  deleteItem,
   openEditItemModal
 } from "./actions/actions";
 
 const mapDispatchToProps = {
   increaseAmount,
   toggleChecked,
-  deleteItem,
   openEditItemModal
 };
 
@@ -86,9 +84,7 @@ class ListItem extends Component {
               <Button onClick={() => this.props.openEditItemModal(item.id)}>
                 E
               </Button>
-            ) : (
-              <Button onClick={() => this.props.deleteItem(item.id)}>D</Button>
-            )}
+            ) : null}
           </Container>
         )}
       </Draggable>
