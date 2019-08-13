@@ -193,6 +193,16 @@ function reducer(state = initialState, action) {
         return element;
       });
       return Object.assign({}, state, { items: newItems });
+    case "DELETE_CHECKED_ITEMS":
+      newItems = [...state.items];
+      newItems.map(element => {
+        if (element.checked === true) {
+          element.synced = false;
+          element.deleted = true;
+        }
+        return element;
+      });
+      return Object.assign({}, state, { items: newItems });
     case "INCREASE_AMOUNT":
       newItems = [...state.items];
       index = newItems.findIndex(item => item.id === action.payload.id);

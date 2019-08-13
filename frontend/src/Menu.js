@@ -1,6 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import { toggleShowEmptyLists, setListName } from "./actions/actions";
+import {
+  deleteCheckedItems,
+  toggleShowEmptyLists,
+  setListName
+} from "./actions/actions";
 import { connect } from "react-redux";
 import Clipboarder from "./components/clipboard";
 
@@ -13,7 +17,11 @@ const Container = styled.div`
   align-items: box-start;
 `;
 
-const mapDispatchToProps = { toggleShowEmptyLists, setListName };
+const mapDispatchToProps = {
+  deleteCheckedItems,
+  toggleShowEmptyLists,
+  setListName
+};
 
 class Menu extends React.Component {
   render() {
@@ -29,6 +37,7 @@ class Menu extends React.Component {
           Sign Out
         </button>
         <button onClick={() => this.props.setListName("")}> CL </button>
+        <button onClick={() => this.props.deleteCheckedItems()}> DC </button>
       </Container>
     );
   }

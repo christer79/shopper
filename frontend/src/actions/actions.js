@@ -74,6 +74,12 @@ export function setItems(items) {
 export function deleteItem(id) {
   return { type: DELETE_ITEM, payload: { id: id } };
 }
+
+const DELETE_CHECKED_ITEMS = "DELETE_CHECKED_ITEMS";
+export function deleteCheckedItems() {
+  return { type: DELETE_CHECKED_ITEMS };
+}
+
 export function toggleChecked(id) {
   return { type: TOGGLE_CHECKED, payload: { id: id } };
 }
