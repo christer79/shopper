@@ -9,6 +9,7 @@ const LISTS = gql`
     lists {
       id
       name
+      listtype
     }
   }
 `;
@@ -34,13 +35,19 @@ class ListsList extends React.Component {
         {({ error, loading, data, ...result }) => {
           if (error) return <Error error={error} />;
           if (loading) return <Loading />;
+          console.log(data.lists);
           return data.lists ? (
             data.lists.map(list => (
-              <List key={list.id} name={list.name} id={list.id} />
+              <List
+                key={list.id}
+                name={list.name}
+                type={list.listtype}
+                id={list.id}
+              />
             ))
           ) : (
-              <div>No lists yet!</div>
-            );
+            <div>No lists yet!</div>
+          );
         }}
       </Query>
     );

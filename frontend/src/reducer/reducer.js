@@ -35,7 +35,8 @@ function reducer(state = initialState, action) {
       });
     case "SET_LIST_NAME":
       return Object.assign({}, state, {
-        selectedList: action.payload.id
+        selectedList: action.payload.id,
+        selectedListType: action.payload.type
       });
     case "SET_ITEM_SUGGESTIONS":
       return Object.assign({}, state, {

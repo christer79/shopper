@@ -205,14 +205,14 @@ func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*Lis
 		log.Fatalf("No user in context\n")
 	}
 	r.CreateNewSuggestionTable(user.UID, input.Listtype)
-	var list_owner = true
+	var listOwner = true
 	query := "INSERT INTO lists(list_id,list_name, list_type, user_uid, owner) VALUES($1,$2,$3,$4,$5) RETURNING id"
 	log.Printf("query: %v\n", query)
 	sqstm, err := r.DB.Prepare(query)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = sqstm.Exec(input.ID, input.Name, input.Listtype, user.UID, list_owner)
+	_, err = sqstm.Exec(input.ID, input.Name, input.Listtype, user.UID, listOwner)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -226,7 +226,7 @@ func (r *mutationResolver) DeleteList(ctx context.Context, id string) (*List, er
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
-	var list_owner = true
+	var listOwner = true
 	sqstm, err := r.DB.Prepare("DELETE FROM lists WHERE list_id = $1 AND user_uid = $2")
 	if err != nil {
 		log.Fatal(err)
@@ -239,7 +239,7 @@ func (r *mutationResolver) DeleteList(ctx context.Context, id string) (*List, er
 	// TODO: Verify owner of list before deleting tables, only dete table if all references in tn lists are gone.
 	r.DeleteListsDB(id)
 
-	return &List{Name: "", ID: id, Owner: list_owner, Sections: []*Section{}, Items: []*Item{}}, nil
+	return &List{Name: "", ID: id, Owner: listOwner, Sections: []*Section{}, Items: []*Item{}}, nil
 }
 func (r *mutationResolver) CreateItem(ctx context.Context, input *NewItem) (*Item, error) {
 	log.Println("CreateItem")
@@ -397,7 +397,7 @@ func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
-	query = "SELECT id, list_id, list_name , owner FROM lists WHERE user_uid = '" + user.UID + "';"
+	query = "SELECT id, list_id, list_name, list_type, owner FROM lists WHERE user_uid = '" + user.UID + "';"
 	rows, err := r.DB.Query(query)
 	defer rows.Close()
 	if err != nil {
@@ -407,7 +407,7 @@ func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
 	for rows.Next() {
 		var i List
 		var id int
-		err := rows.Scan(&id, &i.ID, &i.Name, &i.Owner)
+		err := rows.Scan(&id, &i.ID, &i.Name, &i.Listtype, &i.Owner)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -425,7 +425,7 @@ func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
-	query := "SELECT id, list_id, list_name , owner FROM lists WHERE user_uid = '" + user.UID + "' AND list_id = '" + id + "';"
+	query := "SELECT id, list_id, list_name , list_type, owner FROM lists WHERE user_uid = '" + user.UID + "' AND list_id = '" + id + "';"
 	rows, err := r.DB.Query(query)
 	defer rows.Close()
 	if err != nil {
@@ -435,7 +435,7 @@ func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
 	for rows.Next() {
 		var list List
 		var id int
-		err := rows.Scan(&id, &list.ID, &list.Name, &list.Owner)
+		err := rows.Scan(&id, &list.ID, &list.Name, &list.Listtype, &list.Owner)
 		if err != nil {
 			log.Fatal(err)
 		}

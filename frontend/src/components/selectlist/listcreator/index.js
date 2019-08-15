@@ -7,6 +7,7 @@ const LISTS = gql`
     lists {
       id
       name
+      listtype
     }
   }
 `;

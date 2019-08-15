@@ -62,7 +62,7 @@ class ListItem extends Component {
   }
 
   render() {
-    const { item, index } = this.props;
+    const { item, index, pantry } = this.props;
     if (!item) return null;
     return (
       <Draggable draggableId={item.id} index={index}>
@@ -80,6 +80,7 @@ class ListItem extends Component {
               onChange={() => this.props.toggleChecked(item.id)}
             />
             <ItemContainer>{item.name}</ItemContainer>
+            {pantry ? "" : ""}
             {!item.checked ? (
               <Button onClick={() => this.props.openEditItemModal(item.id)}>
                 E

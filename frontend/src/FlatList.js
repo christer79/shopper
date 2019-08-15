@@ -43,7 +43,8 @@ function mapStateToProps(state) {
   return {
     items: state.items,
     sections: state.sections,
-    showEmptyLists: state.showEmptyLists
+    showEmptyLists: state.showEmptyLists,
+    listType: state.selectedListType
   };
 }
 
@@ -97,7 +98,14 @@ class FlatList extends React.Component {
 
     const listItems = renderItems.map((item, index) => {
       if (this.props.showEmptyLists) return null;
-      return <ListItem key={item.id} item={item} index={index} />;
+      return (
+        <ListItem
+          key={item.id}
+          item={item}
+          index={index}
+          pantry={this.props.listType === "pantry"}
+        />
+      );
     });
 
     if (renderItems.length === 0 && !this.props.showEmptyLists) {

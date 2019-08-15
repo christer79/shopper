@@ -17,10 +17,13 @@ const mapDispatchToProps = {
 
 class List extends React.Component {
   render() {
+    console.log(this.props);
     return (
       <div>
-        <button onClick={() => this.props.setListName(this.props.id)}>
-          {this.props.name}
+        <button
+          onClick={() => this.props.setListName(this.props.id, this.props.type)}
+        >
+          {this.props.name} - ({this.props.type})
         </button>
         <Mutation mutation={DELETE_LIST}>
           {(deleteList, { ...data }) => (

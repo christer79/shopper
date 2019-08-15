@@ -11,10 +11,10 @@ const ADD_ITEM = "ADD_ITEM";
 const TOGGLE_SHOW_EMPTY_LISTS = "TOGGLE_SHOW_EMPTY_LISTS";
 
 const SET_LIST_NAME = "SET_LIST_NAME";
-export function setListName(id) {
+export function setListName(id, listType) {
   return {
     type: SET_LIST_NAME,
-    payload: { id: id }
+    payload: { id: id, type: listType }
   };
 }
 
