@@ -2,6 +2,7 @@ type Item {
   id: ID!
   name: String!
   amount: Float
+  expected: Float
   unit: String
   section: String
   checked: Boolean
@@ -19,7 +20,7 @@ type Suggestion {
   name: String!
   unit: String!
   section: String!
- }
+}
 
 type List {
   name: String!
@@ -40,6 +41,7 @@ input NewItem {
   id: ID!
   name: String!
   amount: Float
+  expected: Float
   unit: String
   section: String
   checked: Boolean

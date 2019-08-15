@@ -16,6 +16,7 @@ type Item struct {
 	ID       string   `json:"id"`
 	Name     string   `json:"name"`
 	Amount   *float64 `json:"amount"`
+	Goal     *float64 `json:"goal"`
 	Unit     *string  `json:"unit"`
 	Section  *string  `json:"section"`
 	Checked  *bool    `json:"checked"`
@@ -36,6 +37,7 @@ type NewItem struct {
 	ID       string   `json:"id"`
 	Name     string   `json:"name"`
 	Amount   *float64 `json:"amount"`
+	Goal     *float64 `json:"goal"`
 	Unit     *string  `json:"unit"`
 	Section  *string  `json:"section"`
 	Checked  *bool    `json:"checked"`
