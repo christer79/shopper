@@ -56,6 +56,10 @@ mkdir -p ${TMP}/${APP_FOLDER}
 cp ${SCHEMA_RELATIVE_PATH} ${TMP}/${APP_FOLDER}/
 cd ${TMP}/${APP_FOLDER}
 
+export GO111MODULE=on
+
+go mod init github.com/christer79/shopper
+
 # SET GO PATH AND RUN INIT SCCRIPT
 export GOPATH=${TMP}
 go get github.com/99designs/gqlgen
@@ -64,6 +68,7 @@ go run github.com/99designs/gqlgen init
 # BACK TO SERVER CODE FOLDER
 cd -
 
+chmod a+rwx -R ${TMP}
 # SAVE GENERATED CODE
 rm -rf .generated_code
 mkdir -p  .generated_code/${APP_FOLDER}
