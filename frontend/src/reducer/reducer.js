@@ -12,6 +12,7 @@ const initialState = {
       item: "",
       id: "",
       amount: 0,
+      goal: 0,
       unit: "",
       section: "",
       section_name: ""
@@ -119,6 +120,7 @@ function reducer(state = initialState, action) {
             .toString(36)
             .substr(2, 9);
         item.amount = 0.0;
+        item.goal = 0.0;
         item.unit = "st";
         item.checked = false;
         item.deleted = false;
@@ -204,12 +206,31 @@ function reducer(state = initialState, action) {
         return element;
       });
       return Object.assign({}, state, { items: newItems });
+    case "UPDATE_AMOUNT":
+      newItems = [...state.items];
+      index = newItems.findIndex(item => item.id === action.payload.id);
+      item = Object.assign({}, newItems[index]);
+      item.synced = false;
+      console.log("UpdateAmount: ", action.payload.amount);
+      item.amount = action.payload.amount;
+      newItems[index] = item;
+      return Object.assign({}, state, { items: newItems });
+    case "UPDATE_GOAL":
+      newItems = [...state.items];
+      index = newItems.findIndex(item => item.id === action.payload.id);
+      item = Object.assign({}, newItems[index]);
+      item.synced = false;
+      console.log("UpdateGoal: ", action.payload.goal);
+      item.goal = action.payload.goal;
+      newItems[index] = item;
+      return Object.assign({}, state, { items: newItems });
     case "INCREASE_AMOUNT":
       newItems = [...state.items];
       index = newItems.findIndex(item => item.id === action.payload.id);
       item = Object.assign({}, newItems[index]);
       item.synced = false;
-      item.amount = item.amount + action.payload.amount;
+      console.log("IncreaseAmount: ", action.payload.amount);
+      item.amount = action.payload.amount + item.amount;
       newItems[index] = item;
       return Object.assign({}, state, { items: newItems });
     case "SWAP_SECTIONS":

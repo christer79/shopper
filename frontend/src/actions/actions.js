@@ -3,7 +3,6 @@ const DELETE_SECTION = "DELETE_SECTION";
 const SWAP_SECTIONS = "SWAP_SECTIONS";
 const SET_SECTIONS = "SET_SECTIONS";
 
-const INCREASE_AMOUNT = "INCREASE_AMOUNT";
 const TOGGLE_CHECKED = "TOGGLE_CHECKED";
 const DELETE_ITEM = "DELETE_ITEM";
 const SET_ITEMS = "SET_ITEMS";
@@ -84,12 +83,30 @@ export function toggleChecked(id) {
   return { type: TOGGLE_CHECKED, payload: { id: id } };
 }
 
+const INCREASE_AMOUNT = "INCREASE_AMOUNT";
 export function increaseAmount(id, amount) {
   return {
     type: INCREASE_AMOUNT,
     payload: { id: id, amount: amount }
   };
 }
+
+const UPDATE_AMOUNT = "UPDATE_AMOUNT";
+export function updateAmount(id, amount) {
+  return {
+    type: UPDATE_AMOUNT,
+    payload: { id: id, amount: amount }
+  };
+}
+
+const UPDATE_GOAL = "UPDATE_GOAL";
+export function updateGoal(id, goal) {
+  return {
+    type: UPDATE_GOAL,
+    payload: { id: id, goal: goal }
+  };
+}
+
 export function addSection(section_name, section_id) {
   return {
     type: ADD_SECTION,

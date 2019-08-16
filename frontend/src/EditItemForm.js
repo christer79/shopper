@@ -40,7 +40,8 @@ function mapStateToProps(state) {
   return {
     itemToEdit: state.editItemModal.itemToEdit,
     sections: state.sections,
-    originalItemId: state.editItemModal.itemId
+    originalItemId: state.editItemModal.itemId,
+    listType: state.selectedListType
   };
 }
 const mapDispatchToProps = {
@@ -107,7 +108,7 @@ class EditItemForm extends Component {
   };
 
   render() {
-    const { name, amount, unit, section_name } = this.props.itemToEdit;
+    const { name, amount, goal, unit, section_name } = this.props.itemToEdit;
     const selectOptions = this.props.sections.map(function(section) {
       return { label: section.name, value: section.id };
     });
@@ -146,7 +147,6 @@ class EditItemForm extends Component {
             value={amount ? amount : 0}
             onChange={this.handleChange}
           />
-
           <Input
             placeholder="Unit"
             type="text"
@@ -156,6 +156,24 @@ class EditItemForm extends Component {
             onChange={this.handleChange}
           />
         </RowContainer>
+        {this.props.listType === "pantry" && (
+          <div>
+            <Label HTMLfor="section">Goal</Label>
+            <RowContainer>
+              <Input
+                placeholder="Goal"
+                type="number"
+                name="goal"
+                id="goal"
+                key="input-goal"
+                inputmode="numeric"
+                step="1"
+                value={goal ? goal : 0}
+                onChange={this.handleChange}
+              />
+            </RowContainer>
+          </div>
+        )}
         <RowContainer>
           <Button type="button" value="+" onClick={this.submitForm} />
           <Button type="button" value="X" onClick={this.clearForm} />

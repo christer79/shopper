@@ -2,14 +2,10 @@ import React, { Component } from "react";
 import styled from "styled-components";
 import { Draggable } from "react-beautiful-dnd";
 import { connect } from "react-redux";
-import {
-  increaseAmount,
-  toggleChecked,
-  openEditItemModal
-} from "./actions/actions";
+import { toggleChecked, openEditItemModal } from "./actions/actions";
+import PantryAmount from "./components/PantryAmount";
 
 const mapDispatchToProps = {
-  increaseAmount,
   toggleChecked,
   openEditItemModal
 };
@@ -80,7 +76,7 @@ class ListItem extends Component {
               onChange={() => this.props.toggleChecked(item.id)}
             />
             <ItemContainer>{item.name}</ItemContainer>
-            {pantry ? "" : ""}
+            {pantry ? <PantryAmount item={item} /> : ""}
             {!item.checked ? (
               <Button onClick={() => this.props.openEditItemModal(item.id)}>
                 E

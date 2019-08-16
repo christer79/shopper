@@ -14,10 +14,10 @@ import {
 const SUGGESTIONS = gql`
   query getSuggestions($list: ID!) {
     suggestions(list: $list) {
-          name
+      name
       section
       unit
-  }
+    }
   }
 `;
 const LIST = gql`
@@ -34,6 +34,7 @@ const LIST = gql`
         id
         name
         amount
+        goal
         unit
         section
         checked
@@ -49,6 +50,7 @@ const CREATE_ITEM = gql`
     $id: ID!
     $name: String!
     $amount: Float
+    $goal: Float
     $unit: String
     $section: String
     $checked: Boolean
@@ -61,6 +63,7 @@ const CREATE_ITEM = gql`
         id: $id
         name: $name
         amount: $amount
+        goal: $goal
         unit: $unit
         section: $section
         checked: $checked
@@ -79,6 +82,7 @@ const UPDATE_ITEM = gql`
     $id: ID!
     $name: String!
     $amount: Float
+    $goal: Float
     $unit: String
     $section: String
     $checked: Boolean
@@ -91,6 +95,7 @@ const UPDATE_ITEM = gql`
         id: $id
         name: $name
         amount: $amount
+        goal: $goal
         unit: $unit
         section: $section
         checked: $checked
@@ -237,6 +242,7 @@ class Api extends React.Component {
                 id: item.id,
                 name: item.name,
                 amount: item.amount,
+                goal: item.goal,
                 unit: item.unit,
                 section: item.section,
                 checked: item.checked,
@@ -269,6 +275,7 @@ class Api extends React.Component {
                 id: item.id,
                 name: item.name,
                 amount: item.amount,
+                goal: item.goal,
                 unit: item.unit,
                 section: item.section,
                 checked: item.checked,
@@ -304,17 +311,17 @@ class Api extends React.Component {
         this.props.setItems(
           data.data.list.items
             ? data.data.list.items.map(entry => {
-              entry.synced = true;
-              return entry;
-            })
+                entry.synced = true;
+                return entry;
+              })
             : []
         );
         this.props.setSections(
           data.data.list.sections
             ? data.data.list.sections.map(entry => {
-              entry.synced = true;
-              return entry;
-            })
+                entry.synced = true;
+                return entry;
+              })
             : []
         );
       });

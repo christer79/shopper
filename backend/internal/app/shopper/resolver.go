@@ -35,7 +35,7 @@ func (r *Resolver) DeleteListsDB(name string) {
 }
 
 func (r *Resolver) CreateNewListDB(name string) {
-	sqstm, err := r.DB.Prepare("CREATE TABLE " + name + "_items(id SERIAL PRIMARY KEY, item_id VARCHAR(50) UNIQUE NOT NULL, name VARCHAR (50) NOT NULL, amount FLOAT8 NOT NULL, unit VARCHAR (50) NOT NULL, section VARCHAR (50) NOT NULL,  checked BOOL NOT NULL,  deleted BOOL NOT NULL,  position INT NOT NULL);")
+	sqstm, err := r.DB.Prepare("CREATE TABLE " + name + "_items(id SERIAL PRIMARY KEY, item_id VARCHAR(50) UNIQUE NOT NULL, name VARCHAR (50) NOT NULL, amount FLOAT8 NOT NULL, unit VARCHAR (50) NOT NULL, section VARCHAR (50) NOT NULL,  checked BOOL NOT NULL,  deleted BOOL NOT NULL,  position INT NOT NULL, goal FLOAT8 NOT NULL);")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -253,13 +253,13 @@ func (r *mutationResolver) CreateItem(ctx context.Context, input *NewItem) (*Ite
 		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
 	}
 	log.Println("Access granted!")
-	query := "INSERT INTO " + input.Table + "_items(item_id, name, amount, unit, section, checked, deleted, position) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id"
+	query := "INSERT INTO " + input.Table + "_items(item_id, name, amount, unit, section, checked, deleted, position, goal) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id"
 	sqstm, err := r.DB.Prepare(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("input: %v, Position %v", input, input.Position)
-	_, err = sqstm.Exec(input.ID, input.Name, input.Amount, input.Unit, input.Section, input.Checked, input.Deleted, input.Position)
+	_, err = sqstm.Exec(input.ID, input.Name, input.Amount, input.Unit, input.Section, input.Checked, input.Deleted, input.Position, input.Goal)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -277,12 +277,12 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input NewItem) (*Item
 		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
 	}
 	log.Println("Access granted!")
-	query := "UPDATE  " + input.Table + "_items SET( name, amount, unit, section, checked, deleted, position) = ($1, $2,$3,$4,$5,$6,$7) WHERE item_id = '" + input.ID + "';"
+	query := "UPDATE  " + input.Table + "_items SET( name, amount, unit, section, checked, deleted, position, goal) = ($1, $2,$3,$4,$5,$6,$7,$8) WHERE item_id = '" + input.ID + "';"
 	sqstm, err := r.DB.Prepare(query)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = sqstm.Exec(input.Name, input.Amount, input.Unit, input.Section, input.Checked, input.Deleted, input.Position)
+	_, err = sqstm.Exec(input.Name, input.Amount, input.Unit, input.Section, input.Checked, input.Deleted, input.Position, input.Goal)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -483,8 +483,8 @@ func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
 		log.Println("Row from items")
 		item := new(Item)
 		var id int
-		// id | item_id | name | amount | unit | section | checked | deleted | position
-		err = rows.Scan(&id, &item.ID, &item.Name, &item.Amount, &item.Unit, &item.Section, &item.Checked, &item.Deleted, &item.Position)
+		// id | item_id | name | amount | goal | unit | section | checked | deleted | position
+		err = rows.Scan(&id, &item.ID, &item.Name, &item.Amount, &item.Unit, &item.Section, &item.Checked, &item.Deleted, &item.Position, &item.Goal)
 		log.Println("Scanned item")
 
 		if err != nil {
