@@ -13,33 +13,28 @@ const mapDispatchToProps = {
   addItem
 };
 
-class Clipboarder extends React.Component {
-  constructor(props) {
-    super(props);
-    this.pasteText = this.pasteText.bind(this);
-  }
+function Clipboarder(props) {
+  const { addItem, items } = props;
 
-  componentDidMount() {
+  React.useEffect(() => {
     document.addEventListener("paste", async event => {
       const text = await navigator.clipboard.readText();
       text.split("\n").forEach(line => {
-        line !== ""
-          ? this.props.addItem({ name: line })
-          : console.log("Empty line");
+        line !== "" ? addItem({ name: line }) : console.log("Empty line");
       });
     });
-  }
-  pasteText() {
+  });
+
+  const pasteText = () => {
     navigator.clipboard.readText().then(text => {
       text.split("\n").forEach(line => {
-        line !== ""
-          ? this.props.addItem({ name: line })
-          : console.log("Empty line");
+        line !== "" ? addItem({ name: line }) : console.log("Empty line");
       });
     });
-  }
-  generateText() {
-    const text = this.props.items
+  };
+
+  const generateText = () => {
+    const text = items
       .map(item => {
         return item.amount === 0
           ? item.name
@@ -47,20 +42,19 @@ class Clipboarder extends React.Component {
       })
       .join("\n");
     return text;
-  }
-  render() {
-    return (
-      <div>
-        <Clipboard
-          data-clipboard-text={this.generateText()}
-          button-title="I'm a tooltip"
-        >
-          CP
-        </Clipboard>
-        <button onClick={this.pasteText}>P</button>
-      </div>
-    );
-  }
+  };
+
+  return (
+    <div>
+      <Clipboard
+        data-clipboard-text={generateText()}
+        button-title="I'm a tooltip"
+      >
+        CP
+      </Clipboard>
+      <button onClick={pasteText}>P</button>
+    </div>
+  );
 }
 
 export default connect(
