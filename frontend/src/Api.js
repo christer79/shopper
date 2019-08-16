@@ -1,8 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 
-import gql from "graphql-tag";
-
 import {
   setSections,
   setItems,
@@ -11,147 +9,16 @@ import {
   setItemSuggestions
 } from "./actions/actions";
 
-const SUGGESTIONS = gql`
-  query getSuggestions($list: ID!) {
-    suggestions(list: $list) {
-      name
-      section
-      unit
-    }
-  }
-`;
-const LIST = gql`
-  query getList($id: ID!) {
-    list(id: $id) {
-      name
-      id
-      sections {
-        name
-        id
-        position
-      }
-      items {
-        id
-        name
-        amount
-        goal
-        unit
-        section
-        checked
-        deleted
-        position
-      }
-    }
-  }
-`;
-
-const CREATE_ITEM = gql`
-  mutation createItem(
-    $id: ID!
-    $name: String!
-    $amount: Float
-    $goal: Float
-    $unit: String
-    $section: String
-    $checked: Boolean
-    $deleted: Boolean
-    $position: Int
-    $table: ID!
-  ) {
-    createItem(
-      input: {
-        id: $id
-        name: $name
-        amount: $amount
-        goal: $goal
-        unit: $unit
-        section: $section
-        checked: $checked
-        deleted: $deleted
-        position: $position
-        table: $table
-      }
-    ) {
-      id
-    }
-  }
-`;
-
-const UPDATE_ITEM = gql`
-  mutation updateItem(
-    $id: ID!
-    $name: String!
-    $amount: Float
-    $goal: Float
-    $unit: String
-    $section: String
-    $checked: Boolean
-    $deleted: Boolean
-    $position: Int
-    $table: ID!
-  ) {
-    updateItem(
-      input: {
-        id: $id
-        name: $name
-        amount: $amount
-        goal: $goal
-        unit: $unit
-        section: $section
-        checked: $checked
-        deleted: $deleted
-        position: $position
-        table: $table
-      }
-    ) {
-      id
-    }
-  }
-`;
-
-const DELETE_ITEM = gql`
-  mutation deleteItem($id: ID!, $table: ID!) {
-    deleteItem(input: { id: $id, table: $table }) {
-      id
-    }
-  }
-`;
-
-const CREATE_SECTION = gql`
-  mutation createSection(
-    $id: ID!
-    $name: String!
-    $position: Int!
-    $table: ID!
-  ) {
-    createSection(
-      input: { id: $id, name: $name, position: $position, table: $table }
-    ) {
-      id
-    }
-  }
-`;
-const UPDATE_SECTION = gql`
-  mutation updateSection(
-    $id: ID!
-    $name: String!
-    $position: Int!
-    $table: ID!
-  ) {
-    updateSection(
-      input: { id: $id, name: $name, position: $position, table: $table }
-    ) {
-      id
-    }
-  }
-`;
-const DELETE_SECTION = gql`
-  mutation deleteSection($id: ID!, $table: ID!) {
-    deleteSection(input: { id: $id, table: $table }) {
-      id
-    }
-  }
-`;
+import {
+  UPDATE_SECTION,
+  DELETE_SECTION,
+  CREATE_SECTION,
+  DELETE_ITEM,
+  UPDATE_ITEM,
+  CREATE_ITEM,
+  LIST,
+  SUGGESTIONS
+} from "./graphqlRequests";
 
 function mapStateToProps(state) {
   return {

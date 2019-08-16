@@ -17,6 +17,8 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
+import { LISTS, CREATE_LIST } from "../../../graphqlRequests";
+
 const styles = makeStyles(theme => ({
   fab: {
     position: "absolute",
@@ -34,25 +36,6 @@ const styles = makeStyles(theme => ({
     marginTop: 20
   }
 }));
-
-const LISTS = gql`
-  {
-    lists {
-      id
-      name
-      listtype
-    }
-  }
-`;
-
-const CREATE_LIST = gql`
-  mutation CreateList($id: ID!, $name: String!, $listtype: String!) {
-    createList(input: { id: $id, name: $name, listtype: $listtype }) {
-      name
-      id
-    }
-  }
-`;
 
 function ListCreator() {
   const [form, setValues] = React.useState({

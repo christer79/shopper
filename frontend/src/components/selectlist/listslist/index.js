@@ -9,15 +9,8 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 
-const LISTS = gql`
-  {
-    lists {
-      id
-      name
-      listtype
-    }
-  }
-`;
+import { LISTS } from "../../../graphqlRequests";
+
 const mapDispatchToProps = {
   setListName
 };
