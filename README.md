@@ -42,17 +42,17 @@ Start in folder frontend:
 
 ### Dump postgres db
 
-    docker exec <container id> pg_dump -U postgres shopping
+    docker exec ${CONTAINER_ID} pg_dump -U postgres shopping
 
 ### Clear database
 
-    docker exec dfced77d0ee0 psql -U postgres -c "DROP DATABASE shopping"
-    docker exec dfced77d0ee0 psql -U postgres -c "CREATE DATABASE shopping"
+    docker exec ${CONTAINER_ID} psql -U postgres -c "DROP DATABASE shopping"
+    docker exec ${CONTAINER_ID} psql -U postgres -c "CREATE DATABASE shopping"
 
 ### Reload db from file
 
-    docker cp ../v1_dump.sql dfced77d0ee0:/
-    docker exec dfced77d0ee0 psql -U postgres shopping -f /v1_dump.sql
+    docker cp ../v2_dump.sql ${CONTAINER_ID}:/
+    docker exec ${CONTAINER_ID} psql -U postgres shopping -f /v2_dump.sql
 
 ## Docker
 
