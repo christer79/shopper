@@ -19,12 +19,6 @@ const mapDispatchToProps = {
   openEditItemModal
 };
 
-function mapStateToProps(state) {
-  return {
-    listType: state.selectedListType
-  };
-}
-
 const useStyles = makeStyles(theme => ({
   root: {
     width: "100%",
@@ -48,7 +42,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Item(props) {
-  const { item, index } = props;
+  const { item, index, pantry } = props;
   const classes = useStyles();
   if (!item) return null;
   return (
@@ -62,7 +56,7 @@ function Item(props) {
           {...provided.draggableProps}
           ref={provided.innerRef}
         >
-          {props.listType !== "pantry" ? (
+          {!pantry ? (
             <ListItemIcon>
               <Checkbox
                 className={classes.checkbox}
@@ -99,6 +93,6 @@ function Item(props) {
 }
 
 export default connect(
-  mapStateToProps,
+  null,
   mapDispatchToProps
 )(Item);
