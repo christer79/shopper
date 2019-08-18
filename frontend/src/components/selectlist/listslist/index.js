@@ -33,7 +33,6 @@ function ListsList() {
           {({ error, loading, data, ...result }) => {
             if (error) return <Error error={error} />;
             if (loading) return <Loading />;
-            console.log(data.lists);
             return data.lists ? (
               data.lists.map(list => (
                 <Grid key={list.id} item xs={12} sm={6} lg={4} xl={3}>
