@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+
 import Lists from "./components/items/Lists";
 import AddItemForm from "./AddItemForm";
 import Api from "./Api";
@@ -256,12 +257,12 @@ class App extends Component {
                     justify="flex-start"
                     alignItems="center"
                   >
-                    <Grid item xs={1}>
+                    <Grid item xs={2}>
                       <Button onClick={() => this.props.setListName("")}>
                         <BackIcon />
                       </Button>
                     </Grid>
-                    <Grid item xs={11}>
+                    <Grid item xs={10}>
                       <AddItemForm />
                     </Grid>
                   </Grid>
