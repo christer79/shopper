@@ -29,6 +29,7 @@ function Lists(props) {
         showChecked={true}
         showDeleted={false}
         selectSection={null}
+        showDeleteButton={true}
         title="Checked Items"
         id="checked-list"
       />

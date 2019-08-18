@@ -1,11 +1,14 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Droppable } from "react-beautiful-dnd";
-import { deleteSection } from "../../actions/actions";
+import { deleteSection, deleteCheckedItems } from "../../actions/actions";
 import { connect } from "react-redux";
 import Item from "./Item";
 import List from "@material-ui/core/List";
 import ListSubheader from "@material-ui/core/ListSubheader";
+import Button from "@material-ui/core/Button";
+import DeleteIcon from "@material-ui/icons/DeleteForeverOutlined";
+import Tooltip from "@material-ui/core/Tooltip";
 
 function mapStateToProps(state) {
   return {
@@ -17,7 +20,8 @@ function mapStateToProps(state) {
 }
 
 const mapDispatchToProps = {
-  deleteSection
+  deleteSection,
+  deleteCheckedItems
 };
 
 const useStyles = makeStyles(theme => ({
@@ -80,6 +84,13 @@ function FlatList(props) {
                 {props.showEmptyLists
                   ? numberOfItems(renderItems.length)
                   : null}
+                {props.showDeleteButton ? (
+                  <Tooltip title="Delete checked items" aria-label="add">
+                    <Button onClick={() => props.deleteCheckedItems()}>
+                      <DeleteIcon />
+                    </Button>
+                  </Tooltip>
+                ) : null}
               </ListSubheader>
             }
           >
@@ -87,29 +98,6 @@ function FlatList(props) {
           </List>
           {provided.placeholder}
         </div>
-
-        // <List
-        //   subheader={
-        //     <ListSubheader component="div" id="nested-list-subheader">
-        //       {props.title}
-        //     </ListSubheader>
-        //   }
-        // >
-        // {/* <Container
-        //   key={props.title}
-        //   ref={provided.innerRef}
-        //   {...provided.droppableProps}
-        // > */}
-        // {/* <Title
-        //   title={props.title}
-        //   items={renderItems}
-        //   showEmptyLists={props.showEmptyLists}
-        //   sectionId={props.selectSection}
-        //   deleteSection={props.deleteSection}
-        // /> */}
-        // {/* {listItems}
-        // {/* </Container> */}
-        // </List>
       )}
     </Droppable>
   );
