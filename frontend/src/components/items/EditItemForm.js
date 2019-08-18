@@ -164,7 +164,7 @@ function EditItemForm(props) {
             name="amount"
             id="amount"
             key="input-amount"
-            inputmode="numeric"
+            inputMode="numeric"
             step="1"
             value={amount ? amount : 0}
             onChange={handleChange}
@@ -189,9 +189,9 @@ function EditItemForm(props) {
                 name="goal"
                 id="goal"
                 key="input-goal"
-                inputmode="numeric"
+                inputMode="numeric"
                 step="1"
-                value={goal ? goal : 0}
+                value={goal ? goal : 1}
                 onChange={handleChange}
               />
             </div>
