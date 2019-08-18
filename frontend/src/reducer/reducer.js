@@ -68,7 +68,8 @@ function reducer(state = initialState, action) {
           section_name: "",
           id: "",
           amout: 0,
-          unit: "st"
+          unit: "st",
+          goal: 1
         };
       } else {
         itemToEdit = state.items.find(item => {
@@ -105,6 +106,8 @@ function reducer(state = initialState, action) {
 
     case "ADD_ITEM":
       // Update if an item with this id already exists
+      console.log(action.payload.item);
+
       var item = Object.assign({}, action.payload.item);
       newItems = [...state.items];
 
@@ -121,7 +124,7 @@ function reducer(state = initialState, action) {
             .toString(36)
             .substr(2, 9);
         item.amount = 0.0;
-        item.goal = 0.0;
+        item.goal = 1;
         item.unit = "st";
         item.checked = false;
         item.deleted = false;
