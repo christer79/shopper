@@ -48,7 +48,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Item(props) {
-  const { item, index, pantry } = props;
+  const { item, index } = props;
   const classes = useStyles();
   if (!item) return null;
   return (
