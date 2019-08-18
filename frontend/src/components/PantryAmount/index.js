@@ -17,10 +17,8 @@ function PantryAmount(props) {
   const createOptions = () => {
     var options = [item.amount];
     for (let i = 0; i <= item.goal; i++) {
-      console.log("index", i);
       options.push(i);
     }
-    console.log(options);
     return [...new Set(options)];
   };
 
@@ -38,7 +36,11 @@ function PantryAmount(props) {
         }}
       >
         {opts.map((index, opt) => {
-          return <option value={opt}>{opt}</option>;
+          return (
+            <option key={index} value={opt}>
+              {opt}
+            </option>
+          );
         })}
       </Select>
     </div>
