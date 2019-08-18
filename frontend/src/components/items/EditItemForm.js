@@ -9,7 +9,8 @@ import {
   addSection,
   openEditItemModal,
   updateEditItemModalItem,
-  closeEditItemModal
+  closeEditItemModal,
+  deleteItem
 } from "../../actions/actions";
 
 import Button from "@material-ui/core/Button";
@@ -25,6 +26,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
+import DeleteIcon from "@material-ui/icons/DeleteForeverOutlined";
 
 function mapStateToProps(state) {
   return {
@@ -41,7 +43,8 @@ const mapDispatchToProps = {
   addSection,
   updateEditItemModalItem,
   openEditItemModal,
-  closeEditItemModal
+  closeEditItemModal,
+  deleteItem
 };
 
 const useStyles = makeStyles(theme => ({
@@ -56,6 +59,7 @@ const useStyles = makeStyles(theme => ({
 
 function EditItemForm(props) {
   const classes = useStyles();
+  const { name, amount, goal, unit, section_name } = props.itemToEdit;
 
   const handleSectionChange = event => {
     var newItem = { ...props.itemToEdit };
@@ -104,7 +108,10 @@ function EditItemForm(props) {
     props.openEditItemModal(props.originalItemId);
   };
 
-  const { name, amount, goal, unit, section_name } = props.itemToEdit;
+  const handleDelete = () => {
+    props.deleteItem(props.itemToEdit.id);
+    props.closeEditItemModal();
+  };
 
   const selectOptions = props.sections.map(function(section) {
     return { label: section.name, value: section.id };
@@ -197,7 +204,10 @@ function EditItemForm(props) {
         )}
       </DialogContent>
       <DialogActions>
-        <Button type="button" value="X" onClick={clearForm}>
+        <Button type="button" onClick={handleDelete}>
+          <DeleteIcon />
+        </Button>
+        <Button type="button" onClick={clearForm}>
           <ClearIcon />
         </Button>
       </DialogActions>
