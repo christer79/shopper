@@ -83,7 +83,7 @@ function FlatList(props) {
                 {props.showEmptyLists
                   ? numberOfItems(renderItems.length)
                   : null}
-                {props.showDeleteButton ? (
+                {props.showDeleteButton & !props.showEmptyLists ? (
                   <Tooltip title="Delete checked items" aria-label="add">
                     <Button onClick={() => props.deleteCheckedItems()}>
                       <DeleteIcon />
