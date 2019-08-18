@@ -235,6 +235,13 @@ function reducer(state = initialState, action) {
       return Object.assign({}, state, { items: newItems });
     case "SWAP_SECTIONS":
       newSections = [...state.sections.sort(sortFunction)];
+      // Force Unsorted to be in top
+      if (
+        newSections[action.payload.index1].id === "section-0" ||
+        newSections[action.payload.index2].id === "section-0"
+      ) {
+        return state;
+      }
       const moved = newSections[action.payload.index1];
       newSections.splice(action.payload.index1, 1);
       newSections.splice(action.payload.index2, 0, moved);

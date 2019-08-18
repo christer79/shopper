@@ -57,6 +57,13 @@ function FlatList(props) {
     );
   });
 
+  const numberOfItems = nr => {
+    return <span> - ({nr} items)</span>;
+  };
+
+  if (renderItems.length === 0 && !props.showEmptyLists) {
+    return null;
+  }
   return (
     <Droppable droppableId={props.id} type="ITEM">
       {provided => (
@@ -69,7 +76,10 @@ function FlatList(props) {
             className={classes.root}
             subheader={
               <ListSubheader component="div" id="nested-list-subheader">
-                {props.title}
+                {props.title}{" "}
+                {props.showEmptyLists
+                  ? numberOfItems(renderItems.length)
+                  : null}
               </ListSubheader>
             }
           >
