@@ -1,5 +1,4 @@
 import React from "react";
-import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
 
 import Button from "@material-ui/core/Button";
@@ -29,11 +28,11 @@ const styles = makeStyles(theme => ({
     margin: "0 auto"
   },
   formControl: {
-    margin: 10,
+    margin: theme.spacing(1),
     minWidth: 120
   },
   selectEmpty: {
-    marginTop: 20
+    marginTop: theme.spacing(2)
   }
 }));
 

@@ -23,6 +23,10 @@ import {
 
 import { firebaseConfig } from "./config/firebaseAuth";
 
+import { ThemeProvider } from "@material-ui/styles";
+import { createMuiTheme } from "@material-ui/core/styles";
+import { blue, orange } from "@material-ui/core/colors";
+
 const persistConfig = {
   key: "root",
   storage
@@ -35,15 +39,21 @@ const store = createStore(persistedReducer, devToolsEnhancer());
 const persistor = persistStore(store);
 persistor.purge();
 
+const theme = createMuiTheme({
+  palette: { primary: { main: blue[500] }, secondary: { main: orange[500] } }
+});
+
 ReactDOM.render(
   <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <FirebaseAuthConsumer>
-          {authState => {
-            return <App authState={authState} />;
-          }}
-        </FirebaseAuthConsumer>
+        <ThemeProvider theme={theme}>
+          <FirebaseAuthConsumer>
+            {authState => {
+              return <App authState={authState} />;
+            }}
+          </FirebaseAuthConsumer>
+        </ThemeProvider>
       </PersistGate>
     </Provider>
   </FirebaseAuthProvider>,
