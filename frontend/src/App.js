@@ -60,7 +60,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.onDragEnd = this.onDragEnd.bind(this);
-    this.componentWillMount = this.componentWillMount.bind(this);
+    this.componentDidMount = this.componentDidMount.bind(this);
   }
 
   httpLink = new HttpLink({
@@ -95,7 +95,7 @@ class App extends Component {
     this.httpLink
   );
 
-  componentWillMount() {
+  componentDidMount() {
     this.listener = firebase.auth().onAuthStateChanged(authUser => {
       authUser.getIdToken().then(token => {
         this.props.setToken(token);
