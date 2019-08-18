@@ -116,7 +116,13 @@ class Api extends React.Component {
                 deleted: item.deleted,
                 position: item.position,
                 table: this.props.selectedList
-              }
+              },
+              refetchQueries: [
+                {
+                  query: LIST,
+                  variables: { id: this.props.selectedList }
+                }
+              ]
             })
             .then(data => {
               this.props.itemSynced(data.data.createItem.id);
@@ -129,7 +135,13 @@ class Api extends React.Component {
               variables: {
                 id: item.id,
                 table: this.props.selectedList
-              }
+              },
+              refetchQueries: [
+                {
+                  query: LIST,
+                  variables: { id: this.props.selectedList }
+                }
+              ]
             })
             .then(data => {
               this.props.itemSynced(data.data.deleteItem.id);
@@ -149,7 +161,13 @@ class Api extends React.Component {
                 deleted: item.deleted,
                 position: item.position,
                 table: this.props.selectedList
-              }
+              },
+              refetchQueries: [
+                {
+                  query: LIST,
+                  variables: { id: this.props.selectedList }
+                }
+              ]
             })
             .then(data => {
               this.props.itemSynced(data.data.updateItem.id);
