@@ -36,7 +36,6 @@ class Menu extends React.Component {
         >
           Sign Out
         </button>
-        <button onClick={() => this.props.setListName("")}> CL </button>
       </Container>
     );
   }

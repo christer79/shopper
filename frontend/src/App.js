@@ -4,6 +4,10 @@ import AddItemForm from "./AddItemForm";
 import Api from "./Api";
 import Menu from "./Menu";
 import EditItemForm from "./components/items/EditItemForm";
+import Button from "@material-ui/core/Button";
+import BackIcon from "@material-ui/icons/ArrowBackOutlined";
+import Grid from "@material-ui/core/Grid";
+
 import { DragDropContext } from "react-beautiful-dnd";
 import SignInScreen from "./components/firebasesignin";
 import ListSelector from "./components/selectlist/listselector";
@@ -23,7 +27,8 @@ import {
   swapSections,
   setItems,
   toggleChecked,
-  setToken
+  setToken,
+  setListName
 } from "./actions/actions";
 import { connect } from "react-redux";
 
@@ -40,7 +45,8 @@ const mapDispatchToProps = {
   swapSections,
   setItems,
   toggleChecked,
-  setToken
+  setToken,
+  setListName
 };
 
 class App extends Component {
@@ -244,7 +250,21 @@ class App extends Component {
                 <div>
                   <EditItemForm />
                   <Api client={this.client} />
-                  <AddItemForm />
+                  <Grid
+                    container
+                    direction="row"
+                    justify="flex-start"
+                    alignItems="center"
+                  >
+                    <Grid item xs={1}>
+                      <Button onClick={() => this.props.setListName("")}>
+                        <BackIcon />
+                      </Button>
+                    </Grid>
+                    <Grid item xs={11}>
+                      <AddItemForm />
+                    </Grid>
+                  </Grid>
                   <DragDropContext onDragEnd={this.onDragEnd}>
                     <Lists />
                   </DragDropContext>
