@@ -27,6 +27,7 @@ const mapDispatchToProps = {
 const useStyles = makeStyles(theme => ({
   root: {
     width: "100%",
+    zIndex: 0,
     backgroundColor: theme.palette.background.paper
   }
 }));
