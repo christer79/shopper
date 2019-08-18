@@ -1,6 +1,7 @@
 const initialState = {
   token: "",
   selectedList: "",
+  selectedListType: "",
   sections: [],
   items: [], // items element: {}
   itemSuggestions: [],
@@ -211,7 +212,6 @@ function reducer(state = initialState, action) {
       index = newItems.findIndex(item => item.id === action.payload.id);
       item = Object.assign({}, newItems[index]);
       item.synced = false;
-      console.log("UpdateAmount: ", action.payload.amount);
       item.amount = action.payload.amount;
       newItems[index] = item;
       return Object.assign({}, state, { items: newItems });
@@ -220,7 +220,6 @@ function reducer(state = initialState, action) {
       index = newItems.findIndex(item => item.id === action.payload.id);
       item = Object.assign({}, newItems[index]);
       item.synced = false;
-      console.log("UpdateGoal: ", action.payload.goal);
       item.goal = action.payload.goal;
       newItems[index] = item;
       return Object.assign({}, state, { items: newItems });
@@ -229,7 +228,6 @@ function reducer(state = initialState, action) {
       index = newItems.findIndex(item => item.id === action.payload.id);
       item = Object.assign({}, newItems[index]);
       item.synced = false;
-      console.log("IncreaseAmount: ", action.payload.amount);
       item.amount = action.payload.amount + item.amount;
       newItems[index] = item;
       return Object.assign({}, state, { items: newItems });
