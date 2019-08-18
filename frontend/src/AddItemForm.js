@@ -30,7 +30,7 @@ function AddItemForm(props) {
         unit: "st",
         section: "section-0",
         amount: 0.0,
-        goal: 0.0
+        goal: 1
       });
     } else {
       // find correct item in itemSuggestions
