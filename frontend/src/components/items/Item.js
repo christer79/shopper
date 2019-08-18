@@ -73,9 +73,13 @@ function Item(props) {
                 onChange={() => props.toggleChecked(item.id)}
               />
             </ListItemIcon>
-          ) : null}
+          ) : (
+            <ListItemIcon>
+              <PantryAmount item={item} />
+            </ListItemIcon>
+          )}
           <ListItemText className={classes.itemText} primary={item.name} />
-          {pantry ? <PantryAmount item={item} /> : ""}
+
           {!item.checked ? (
             <ListItemSecondaryAction>
               <Button
