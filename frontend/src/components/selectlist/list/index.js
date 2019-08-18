@@ -21,7 +21,7 @@ function List(props) {
   const { type, name, id, setListName } = props;
   return (
     <Card>
-      <CardContent>
+      <CardContent onClick={() => setListName(id, type)}>
         <Typography gutterBottom variant="h5" component="h2">
           {type === "shopping" ? <ShoppingIcon /> : <KitchenIcon />}
           {name}
