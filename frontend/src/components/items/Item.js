@@ -69,7 +69,7 @@ function Item(props) {
             </ListItemIcon>
           ) : (
             <ListItemIcon>
-              <PantryAmount item={item} />
+              <PantryAmount item={item} classes={classes} />
             </ListItemIcon>
           )}
           <ListItemText className={classes.itemText} primary={item.name} />
