@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { Mutation } from "react-apollo";
 
 import Card from "@material-ui/core/Card";
-import { CardActionArea, CardContent } from "@material-ui/core";
+import { CardActions, CardContent } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/DeleteForeverOutlined";
 import ShoppingIcon from "@material-ui/icons/ShoppingCartOutlined";
 import KitchenIcon from "@material-ui/icons/KitchenOutlined";
@@ -27,7 +27,7 @@ function List(props) {
           {name}
         </Typography>
       </CardContent>
-      <CardActionArea>
+      <CardActions>
         <Button onClick={() => setListName(id, type)}>Open</Button>
         <Mutation mutation={DELETE_LIST}>
           {(deleteList, { ...data }) => (
@@ -49,7 +49,7 @@ function List(props) {
             </Button>
           )}
         </Mutation>
-      </CardActionArea>
+      </CardActions>
     </Card>
   );
 }
