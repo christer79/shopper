@@ -19,6 +19,12 @@ const mapDispatchToProps = {
   openEditItemModal
 };
 
+function mapStateToProps(state) {
+  return {
+    listType: state.selectedListType
+  };
+}
+
 const useStyles = makeStyles(theme => ({
   root: {
     width: "100%",
@@ -52,20 +58,22 @@ function Item(props) {
           className={classes.dense}
           key={item.id}
           dense
-          {...provided.draggableProps}
           {...provided.dragHandleProps}
+          {...provided.draggableProps}
           ref={provided.innerRef}
         >
-          <ListItemIcon>
-            <Checkbox
-              className={classes.checkbox}
-              edge="start"
-              checked={item.checked ? "checked" : ""}
-              tabIndex={-1}
-              disableRipple
-              onChange={() => props.toggleChecked(item.id)}
-            />
-          </ListItemIcon>
+          {props.listType !== "pantry" ? (
+            <ListItemIcon>
+              <Checkbox
+                className={classes.checkbox}
+                edge="start"
+                checked={item.checked ? "checked" : ""}
+                tabIndex={-1}
+                disableRipple
+                onChange={() => props.toggleChecked(item.id)}
+              />
+            </ListItemIcon>
+          ) : null}
           <ListItemText className={classes.itemText} primary={item.name} />
           {pantry ? <PantryAmount item={item} /> : ""}
           {!item.checked ? (
@@ -87,6 +95,6 @@ function Item(props) {
 }
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(Item);
