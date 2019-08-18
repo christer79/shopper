@@ -1,4 +1,5 @@
 import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
 
 import { connect } from "react-redux";
 import CreatableSelect from "react-select/lib/Creatable";
@@ -21,6 +22,12 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import IconButton from "@material-ui/core/IconButton";
+import Typography from "@material-ui/core/Typography";
+import CloseIcon from "@material-ui/icons/Close";
+
 function mapStateToProps(state) {
   return {
     editItemModalShowing: state.editItemModal.Showing,
@@ -39,7 +46,19 @@ const mapDispatchToProps = {
   closeEditItemModal
 };
 
+const useStyles = makeStyles(theme => ({
+  appBar: {
+    position: "relative"
+  },
+  title: {
+    marginLeft: theme.spacing(2),
+    flex: 1
+  }
+}));
+
 function EditItemForm(props) {
+  const classes = useStyles();
+
   const handleSectionChange = event => {
     var newItem = { ...props.itemToEdit };
     if (!event) {
@@ -88,15 +107,35 @@ function EditItemForm(props) {
   };
 
   const { name, amount, goal, unit, section_name } = props.itemToEdit;
+
   const selectOptions = props.sections.map(function(section) {
     return { label: section.name, value: section.id };
   });
+
   return (
     <Dialog
       open={props.editItemModalShowing}
       onClose={props.closeEditItemModal}
+      fullScreen
     >
-      <DialogTitle id="form-dialog-title">Edit Item...</DialogTitle>
+      <AppBar className={classes.appBar}>
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={props.closeEditItemModal}
+            aria-label="close"
+          >
+            <CloseIcon />
+          </IconButton>
+          <Typography variant="h6" className={classes.title}>
+            Edit Item...
+          </Typography>
+          <Button color="inherit" onClick={submitForm}>
+            save
+          </Button>
+        </Toolbar>
+      </AppBar>
       <DialogContent>
         <TextField
           label="Name"
@@ -160,9 +199,6 @@ function EditItemForm(props) {
         )}
       </DialogContent>
       <DialogActions>
-        <Button type="button" value="+" onClick={submitForm}>
-          <SaveIcon />
-        </Button>
         <Button type="button" value="X" onClick={clearForm}>
           <ClearIcon />
         </Button>
