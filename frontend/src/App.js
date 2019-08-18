@@ -1,10 +1,9 @@
 import React, { Component } from "react";
-import Lists from "./Lists";
+import Lists from "./components/items/Lists";
 import AddItemForm from "./AddItemForm";
 import Api from "./Api";
-import Modal from "./components/Modal/Modal";
 import Menu from "./Menu";
-import EditItemForm from "./EditItemForm";
+import EditItemForm from "./components/items/EditItemForm";
 import { DragDropContext } from "react-beautiful-dnd";
 import SignInScreen from "./components/firebasesignin";
 import ListSelector from "./components/selectlist/listselector";
@@ -25,7 +24,6 @@ import {
   swapSections,
   setItems,
   toggleChecked,
-  closeEditItemModal,
   setToken
 } from "./actions/actions";
 import { connect } from "react-redux";
@@ -42,8 +40,6 @@ function mapStateToProps(state) {
     selectedList: state.selectedList,
     sections: state.sections,
     items: state.items,
-    editItemModalShowing: state.editItemModal.Showing,
-    editItemModalItemId: state.editItemModal.ItemId,
     token: state.token
   };
 }
@@ -52,7 +48,6 @@ const mapDispatchToProps = {
   swapSections,
   setItems,
   toggleChecked,
-  closeEditItemModal,
   setToken
 };
 
@@ -234,10 +229,6 @@ class App extends Component {
     this.props.setItems(_items);
   };
 
-  closeModalHandler = () => {
-    this.props.closeEditItemModal();
-  };
-
   render() {
     return (
       <Container>
@@ -259,19 +250,7 @@ class App extends Component {
               }
               return (
                 <div>
-                  {this.props.editItemModalShowing ? (
-                    <div
-                      onClick={this.closeModalHandler}
-                      className="back-drop"
-                    />
-                  ) : null}
-                  <Modal
-                    className="modal"
-                    show={this.props.editItemModalShowing}
-                    close={this.closeModalHandler}
-                  >
-                    <EditItemForm editedItem={this.props.editItemModalItemId} />
-                  </Modal>
+                  <EditItemForm />
 
                   <Api client={this.client} />
 
