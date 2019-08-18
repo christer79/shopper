@@ -50,7 +50,6 @@ function ListCreator() {
   }
 
   const updateField = e => {
-    console.log("Updating field: ", e.target.name, " with: ", e.target.value);
     setValues({
       ...form,
       [e.target.name]: e.target.value
