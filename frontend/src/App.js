@@ -7,7 +7,6 @@ import EditItemForm from "./components/items/EditItemForm";
 import { DragDropContext } from "react-beautiful-dnd";
 import SignInScreen from "./components/firebasesignin";
 import ListSelector from "./components/selectlist/listselector";
-import styled from "styled-components";
 import * as firebase from "firebase";
 
 import { ApolloProvider } from "react-apollo";
@@ -27,13 +26,6 @@ import {
   setToken
 } from "./actions/actions";
 import { connect } from "react-redux";
-
-const Container = styled.div`
-  background-color: #dddddd;
-  display: flex
-  flex-direction: column;
-  height: 100%
-`;
 
 function mapStateToProps(state) {
   return {
@@ -231,7 +223,7 @@ class App extends Component {
 
   render() {
     return (
-      <Container>
+      <div>
         <FirebaseAuthConsumer>
           {({ isSignedIn }) => {
             if (isSignedIn === false) {
@@ -251,9 +243,7 @@ class App extends Component {
               return (
                 <div>
                   <EditItemForm />
-
                   <Api client={this.client} />
-
                   <AddItemForm />
                   <DragDropContext onDragEnd={this.onDragEnd}>
                     <Lists />
@@ -264,7 +254,7 @@ class App extends Component {
             }}
           </IfFirebaseAuthed>
         </ApolloProvider>
-      </Container>
+      </div>
     );
   }
 }
