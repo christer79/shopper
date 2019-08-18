@@ -61,7 +61,7 @@ function Item(props) {
               <Checkbox
                 className={classes.checkbox}
                 edge="start"
-                checked={item.checked ? "checked" : ""}
+                checked={item.checked}
                 tabIndex={-1}
                 disableRipple
                 onChange={() => props.toggleChecked(item.id)}
