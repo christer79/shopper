@@ -29,7 +29,6 @@ function PantryAmount(props) {
   };
 
   const opts = createOptions();
-  console.log("goal is: ", item.goal, "for: ", item.name);
   return (
     <div>
       {item.goal !== 1 ? (
