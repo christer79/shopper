@@ -59,7 +59,7 @@ function Menu(props) {
   }
   return (
     <Container>
-      <button onClick={() => this.props.toggleShowEmptyLists()}>S/H</button>
+      <button onClick={() => props.toggleShowEmptyLists()}>S/H</button>
       <Clipboarder />
 
       {props.listType === "pantry" ? (
