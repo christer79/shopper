@@ -72,8 +72,15 @@ function Item(props) {
               <PantryAmount item={item} classes={classes} />
             </ListItemIcon>
           )}
-          <ListItemText className={classes.itemText} primary={item.name} />
-
+          <ListItemText
+            className={classes.itemText}
+            primary={
+              item.name +
+              (item.amount !== 1
+                ? " (" + item.amount + " " + item.unit + ")"
+                : null)
+            }
+          />
           {!item.checked ? (
             <ListItemSecondaryAction>
               <Button
