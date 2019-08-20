@@ -133,7 +133,7 @@ function ListCreator() {
 
       <Fab
         onClick={() => setDialogOpen(true)}
-        color="secondary"
+        color="primary"
         aria-label="Add"
         className={classes.fab}
       >
