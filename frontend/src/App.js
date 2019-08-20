@@ -5,6 +5,7 @@ import AddItemForm from "./AddItemForm";
 import Api from "./Api";
 import Menu from "./Menu";
 import EditItemForm from "./components/items/EditItemForm";
+import AddFromPantryDialog from "./components/AddFromPantryDialog";
 import Button from "@material-ui/core/Button";
 import BackIcon from "@material-ui/icons/ArrowBackOutlined";
 import Grid from "@material-ui/core/Grid";
@@ -250,7 +251,8 @@ class App extends Component {
               return (
                 <div>
                   <EditItemForm />
-                  <Api client={this.client} />
+                  <AddFromPantryDialog />
+                  <Api client={this.client} key={this.props.selectedList} />
                   <Grid
                     container
                     direction="row"

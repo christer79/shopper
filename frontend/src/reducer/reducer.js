@@ -1,3 +1,5 @@
+import { ADD_PANTRY_TO_SHOPPING_LIST, SET_LISTS } from "../actions/actions";
+
 const initialState = {
   token: "",
   selectedList: "",
@@ -6,6 +8,9 @@ const initialState = {
   items: [], // items element: {}
   itemSuggestions: [],
   showEmptyLists: false,
+  itemsFromPantry: [],
+  listToAddFromPantry: "",
+  lists: [],
   editItemModal: {
     Showing: false,
     itemId: "",
@@ -31,6 +36,21 @@ function reducer(state = initialState, action) {
   var newSections;
   var newItems;
   switch (action.type) {
+    case SET_LISTS:
+      return Object.assign({}, state, {
+        lists: action.payload.lists
+      });
+    case ADD_PANTRY_TO_SHOPPING_LIST:
+      if (action.payload.items.length === 0) {
+        return Object.assign({}, state, {
+          itemsFromPantry: [],
+          listToAddFromPantry: ""
+        });
+      }
+      return Object.assign({}, state, {
+        itemsFromPantry: action.payload.items,
+        listToAddFromPantry: action.payload.listId
+      });
     case "SET_TOKEN":
       return Object.assign({}, state, {
         token: action.payload.token
@@ -106,8 +126,6 @@ function reducer(state = initialState, action) {
 
     case "ADD_ITEM":
       // Update if an item with this id already exists
-      console.log(action.payload.item);
-
       var item = Object.assign({}, action.payload.item);
       newItems = [...state.items];
 
@@ -123,7 +141,7 @@ function reducer(state = initialState, action) {
           Math.random()
             .toString(36)
             .substr(2, 9);
-        item.amount = 0.0;
+        item.amount = 1;
         item.goal = 1;
         item.unit = "st";
         item.checked = false;

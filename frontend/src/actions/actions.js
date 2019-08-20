@@ -5,9 +5,24 @@ const SET_SECTIONS = "SET_SECTIONS";
 
 const TOGGLE_CHECKED = "TOGGLE_CHECKED";
 const DELETE_ITEM = "DELETE_ITEM";
-const SET_ITEMS = "SET_ITEMS";
 const ADD_ITEM = "ADD_ITEM";
 const TOGGLE_SHOW_EMPTY_LISTS = "TOGGLE_SHOW_EMPTY_LISTS";
+
+export const SET_LISTS = "SET_LISTS";
+export function setLists(lists) {
+  return {
+    type: SET_LISTS,
+    payload: { lists: lists }
+  };
+}
+
+export const ADD_PANTRY_TO_SHOPPING_LIST = "ADD_PANTRY_TO_SHOPPING_LIST";
+export function addPantryToShoppingList(listId, items) {
+  return {
+    type: ADD_PANTRY_TO_SHOPPING_LIST,
+    payload: { listId: listId, items: items }
+  };
+}
 
 const SET_LIST_NAME = "SET_LIST_NAME";
 export function setListName(id, listType) {
@@ -67,6 +82,7 @@ export function addItem(item) {
   return { type: ADD_ITEM, payload: { item: item } };
 }
 
+const SET_ITEMS = "SET_ITEMS";
 export function setItems(items) {
   return { type: SET_ITEMS, payload: { items: items } };
 }
