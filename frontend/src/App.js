@@ -6,9 +6,6 @@ import Api from "./Api";
 import Menu from "./Menu";
 import EditItemForm from "./components/items/EditItemForm";
 import AddFromPantryDialog from "./components/AddFromPantryDialog";
-import Button from "@material-ui/core/Button";
-import BackIcon from "@material-ui/icons/ArrowBackOutlined";
-import Grid from "@material-ui/core/Grid";
 
 import { DragDropContext } from "react-beautiful-dnd";
 import SignInScreen from "./components/firebasesignin";

@@ -15,9 +15,6 @@ import {
 import { connect } from "react-redux";
 import Clipboarder from "./components/clipboard";
 
-import firebase from "firebase/app";
-import "firebase/auth";
-
 const Container = styled.div`
   display: flex;
   flex-direction: row;
