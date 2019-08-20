@@ -13,6 +13,7 @@ import Grid from "@material-ui/core/Grid";
 import { DragDropContext } from "react-beautiful-dnd";
 import SignInScreen from "./components/firebasesignin";
 import ListSelector from "./components/selectlist/listselector";
+import NavBar from "./components/navBar";
 import * as firebase from "firebase";
 
 import { ApolloProvider } from "react-apollo";
@@ -22,7 +23,9 @@ import { split, concat, ApolloLink } from "apollo-link";
 import { HttpLink } from "apollo-link-http";
 import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
-
+import ShoppingIcon from "@material-ui/icons/ShoppingCartOutlined";
+import KitchenIcon from "@material-ui/icons/KitchenOutlined";
+import ListIcon from "@material-ui/icons/ListAlt";
 import { FirebaseAuthConsumer, IfFirebaseAuthed } from "@react-firebase/auth";
 
 import {
@@ -39,7 +42,8 @@ function mapStateToProps(state) {
     selectedList: state.selectedList,
     sections: state.sections,
     items: state.items,
-    token: state.token
+    token: state.token,
+    lists: state.lists
   };
 }
 
@@ -246,28 +250,40 @@ class App extends Component {
                 return <div>Waiting for token</div>;
               }
               if (this.props.selectedList === "") {
-                return <ListSelector />;
+                return (
+                  <div>
+                    <NavBar
+                      icon={<ListIcon />}
+                      page="Select list...."
+                      onBack={() => firebase.auth().signOut()}
+                    />
+                    <ListSelector />
+                  </div>
+                );
               }
               return (
                 <div>
                   <EditItemForm />
                   <AddFromPantryDialog />
                   <Api client={this.client} key={this.props.selectedList} />
-                  <Grid
-                    container
-                    direction="row"
-                    justify="flex-start"
-                    alignItems="center"
-                  >
-                    <Grid item xs={2}>
-                      <Button onClick={() => this.props.setListName("")}>
-                        <BackIcon />
-                      </Button>
-                    </Grid>
-                    <Grid item xs={10}>
-                      <AddItemForm />
-                    </Grid>
-                  </Grid>
+                  <NavBar
+                    icon={
+                      this.props.lists.find(
+                        list => list.id === this.props.selectedList
+                      ).listtype === "shopping" ? (
+                        <ShoppingIcon />
+                      ) : (
+                        <KitchenIcon />
+                      )
+                    }
+                    page={
+                      this.props.lists.find(
+                        list => list.id === this.props.selectedList
+                      ).name
+                    }
+                    onBack={() => this.props.setListName("")}
+                  />
+                  <AddItemForm />
                   <DragDropContext onDragEnd={this.onDragEnd}>
                     <Lists />
                   </DragDropContext>

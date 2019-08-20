@@ -64,13 +64,7 @@ function Menu(props) {
     <Container>
       <button onClick={() => this.props.toggleShowEmptyLists()}>S/H</button>
       <Clipboarder />
-      <button
-        onClick={() => {
-          firebase.auth().signOut();
-        }}
-      >
-        Sign Out
-      </button>
+
       {props.listType === "pantry" ? (
         <Query query={LISTS} errorPolicy="all">
           {({ error, loading, data, ...result }) => {
