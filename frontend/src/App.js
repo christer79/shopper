@@ -23,6 +23,8 @@ import { getMainDefinition } from "apollo-utilities";
 import ShoppingIcon from "@material-ui/icons/ShoppingCartOutlined";
 import KitchenIcon from "@material-ui/icons/KitchenOutlined";
 import ListIcon from "@material-ui/icons/ListAlt";
+import ClearIcon from "@material-ui/icons/ClearOutlined";
+import ExitToAppIcon from "@material-ui/icons/ExitToAppOutlined";
 import { FirebaseAuthConsumer, IfFirebaseAuthed } from "@react-firebase/auth";
 
 import {
@@ -253,6 +255,7 @@ class App extends Component {
                       icon={<ListIcon />}
                       page="Select list...."
                       onBack={() => firebase.auth().signOut()}
+                      backIcon={<ExitToAppIcon />}
                     />
                     <ListSelector />
                   </div>
@@ -273,6 +276,7 @@ class App extends Component {
                         <KitchenIcon />
                       )
                     }
+                    backIcon={<ClearIcon />}
                     page={
                       this.props.lists.find(
                         list => list.id === this.props.selectedList
