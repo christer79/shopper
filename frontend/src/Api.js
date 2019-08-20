@@ -61,7 +61,13 @@ class Api extends React.Component {
                 name: section.name,
                 position: section.position,
                 table: this.props.selectedList
-              }
+              },
+              refetchQueries: [
+                {
+                  query: LIST,
+                  variables: { id: this.props.selectedList }
+                }
+              ]
             })
             .then(data => {
               this.props.sectionSynced(data.data.createSection.id);
@@ -74,7 +80,13 @@ class Api extends React.Component {
               variables: {
                 id: section.id,
                 table: this.props.selectedList
-              }
+              },
+              refetchQueries: [
+                {
+                  query: LIST,
+                  variables: { id: this.props.selectedList }
+                }
+              ]
             })
             .then(data => {
               this.props.sectionSynced(data.data.deleteSection.id);
@@ -88,7 +100,13 @@ class Api extends React.Component {
                 name: section.name,
                 position: section.position,
                 table: this.props.selectedList
-              }
+              },
+              refetchQueries: [
+                {
+                  query: LIST,
+                  variables: { id: this.props.selectedList }
+                }
+              ]
             })
             .then(data => {
               this.props.sectionSynced(data.data.updateSection.id);
