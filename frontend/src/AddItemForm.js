@@ -71,6 +71,7 @@ function AddItemForm(props) {
 
   return (
     <CreatableSelect
+      placeholder="Add new item..."
       isClearable
       id="item"
       value={name}
