@@ -95,8 +95,8 @@ function FlatList(props) {
             }
           >
             {listItems}
+            {provided.placeholder}
           </List>
-          {provided.placeholder}
         </div>
       )}
     </Droppable>
