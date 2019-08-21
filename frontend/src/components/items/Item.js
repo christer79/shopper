@@ -78,7 +78,7 @@ function Item(props) {
               item.name +
               (item.amount !== 1
                 ? " (" + item.amount + " " + item.unit + ")"
-                : null)
+                : "")
             }
           />
           {!item.checked ? (
