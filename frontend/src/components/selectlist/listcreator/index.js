@@ -1,5 +1,5 @@
 import React from "react";
-import { Mutation } from "react-apollo";
+import { useMutation } from "@apollo/react-hooks";
 
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
@@ -37,6 +37,8 @@ const styles = makeStyles(theme => ({
 }));
 
 function ListCreator() {
+  const [createList] = useMutation(CREATE_LIST);
+
   const [form, setValues] = React.useState({
     name: "",
     listtype: "shopping"
@@ -97,37 +99,34 @@ function ListCreator() {
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Mutation mutation={CREATE_LIST}>
-            {(createList, { ...data }) => (
-              <Button
-                onClick={() => {
-                  createList({
-                    variables: {
-                      id:
-                        "_" +
-                        Math.random()
-                          .toString(36)
-                          .substr(2, 9),
-                      name: form.name,
-                      listtype: form.listtype
-                    },
-                    refetchQueries: [
-                      {
-                        query: LISTS
-                      }
-                    ]
-                  });
-                  setDialogOpen(false);
-                  setValues({ name: "", listtype: "shopping" });
-                }}
-                noValidate
-                autoComplete="off"
-                id="createlist"
-              >
-                ADD
-              </Button>
-            )}
-          </Mutation>
+
+          <Button
+            onClick={() => {
+              createList({
+                variables: {
+                  id:
+                    "_" +
+                    Math.random()
+                      .toString(36)
+                      .substr(2, 9),
+                  name: form.name,
+                  listtype: form.listtype
+                },
+                refetchQueries: [
+                  {
+                    query: LISTS
+                  }
+                ]
+              });
+              setDialogOpen(false);
+              setValues({ name: "", listtype: "shopping" });
+            }}
+            noValidate
+            autoComplete="off"
+            id="createlist"
+          >
+            ADD
+          </Button>
         </DialogActions>
       </Dialog>
 

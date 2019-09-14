@@ -1,7 +1,7 @@
 import React from "react";
 import { setListName } from "../../../actions/actions";
 import { connect } from "react-redux";
-import { Mutation } from "react-apollo";
+import { useMutation } from "@apollo/react-hooks";
 
 import Card from "@material-ui/core/Card";
 import { CardActions, CardContent } from "@material-ui/core";
@@ -19,6 +19,8 @@ const mapDispatchToProps = {
 
 function List(props) {
   const { type, name, id, setListName } = props;
+  const [deleteList] = useMutation(DELETE_LIST);
+
   return (
     <Card>
       <CardContent onClick={() => setListName(id, type)}>
@@ -29,26 +31,22 @@ function List(props) {
       </CardContent>
       <CardActions>
         <Button onClick={() => setListName(id, type)}>Open</Button>
-        <Mutation mutation={DELETE_LIST}>
-          {(deleteList, { ...data }) => (
-            <Button
-              onClick={e => {
-                deleteList({
-                  variables: {
-                    id: id
-                  },
-                  refetchQueries: [
-                    {
-                      query: LISTS
-                    }
-                  ]
-                });
-              }}
-            >
-              <DeleteIcon />
-            </Button>
-          )}
-        </Mutation>
+        <Button
+          onClick={e => {
+            deleteList({
+              variables: {
+                id: id
+              },
+              refetchQueries: [
+                {
+                  query: LISTS
+                }
+              ]
+            });
+          }}
+        >
+          <DeleteIcon />
+        </Button>
       </CardActions>
     </Card>
   );
