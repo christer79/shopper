@@ -14,7 +14,7 @@ const mapDispatchToProps = {
 };
 
 function Error(props) {
-  return <Typography>Error loading: + {props.error}</Typography>;
+  return <Typography>Error loading: </Typography>;
 }
 
 function Loading() {
@@ -26,9 +26,9 @@ function ListsList(props) {
     <Grid container spacing={4} style={{ padding: 24 }}>
       <Query query={LISTS} errorPolicy="all">
         {({ error, loading, data, ...result }) => {
-          props.setLists(data.lists);
           if (error) return <Error error={error} />;
           if (loading) return <Loading />;
+          props.setLists(data.lists);
           return data.lists ? (
             data.lists.map(list => (
               <Grid key={list.id} item xs={12} sm={6} lg={4} xl={3}>
