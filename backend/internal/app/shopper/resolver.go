@@ -64,8 +64,6 @@ func (r *Resolver) CreateNewListDB(name string) {
 }
 
 func (r *Resolver) CreateNewSuggestionTable(user string, listType string) {
-	log.Println("CreateNewSuggestionTable")
-	//TODO: Only try to create if it does not exits
 	query := "CREATE TABLE _" + user + "_" + listType + "_suggestions(id SERIAL PRIMARY KEY, item_name VARCHAR(50) UNIQUE NOT NULL, section_name VARCHAR (50) NOT NULL, unit VARCHAR(50) NOT NULL);"
 	log.Printf("CreateNewSuggestionTable: %s\n", query)
 	sqstm, err := r.DB.Prepare(query)
@@ -79,7 +77,6 @@ func (r *Resolver) CreateNewSuggestionTable(user string, listType string) {
 }
 
 func (r Resolver) GetListType(list_id string) string {
-	log.Println("GetListType")
 	query := "SELECT list_type FROM lists WHERE list_id='" + list_id + "';"
 	log.Printf("GetListType, %+v\n", query)
 	rows, err := r.DB.Query(query)
@@ -98,7 +95,6 @@ func (r Resolver) GetListType(list_id string) string {
 }
 
 func (r *Resolver) GetSectionName(table, section_id string) string {
-	log.Println("GetSectionName")
 	query := "SELECT name FROM " + table + "_sections WHERE section_id = '" + section_id + "';"
 	log.Printf("GetSectionName, %+v\n", query)
 
@@ -173,7 +169,6 @@ func (r *Resolver) AddSuggestion(_user, _item_name, _section_id, _unit, _table *
 }
 
 func (r Resolver) AccessAllowed(uid, table string) (bool, error) {
-	log.Println("AccessAllowed")
 	query := "SELECT id, list_id, list_name , owner FROM lists WHERE user_uid = '" + uid + "' AND list_id = '" + table + "';"
 	log.Printf("AccessAllowed, %+v\n", query)
 
@@ -211,7 +206,6 @@ func (r *Resolver) Subscription() SubscriptionResolver {
 type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*List, error) {
-	log.Println("CreateList")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
@@ -234,13 +228,16 @@ func (r *mutationResolver) CreateList(ctx context.Context, input *NewList) (*Lis
 }
 
 func (r *mutationResolver) DeleteList(ctx context.Context, id string) (*List, error) {
-	log.Printf("DeleteList %+v\n",id)
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
 	var listOwner = true
-	sqstm, err := r.DB.Prepare("DELETE FROM lists WHERE list_id = $1 AND user_uid = $2")
+	query := "DELETE FROM lists WHERE list_id = $1 AND user_uid = $2"
+	log.Printf("DeleteList %+v, %+v\n", id, query)
+
+	sqstm, err := r.DB.Prepare(query)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -255,7 +252,6 @@ func (r *mutationResolver) DeleteList(ctx context.Context, id string) (*List, er
 	return &List{Name: "", ID: id, Owner: listOwner, Sections: []*Section{}, Items: []*Item{}}, nil
 }
 func (r *mutationResolver) CreateItem(ctx context.Context, input *NewItem) (*Item, error) {
-	log.Println("CreateItem")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
@@ -265,7 +261,6 @@ func (r *mutationResolver) CreateItem(ctx context.Context, input *NewItem) (*Ite
 	if !access {
 		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
 	}
-	log.Println("Access granted!")
 	query := "INSERT INTO " + input.Table + "_items(item_id, name, amount, unit, section, checked, deleted, position, goal) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id"
 	log.Printf("CreateItem, %+v\n", query)
 
@@ -282,7 +277,6 @@ func (r *mutationResolver) CreateItem(ctx context.Context, input *NewItem) (*Ite
 	return &Item{ID: input.ID}, nil
 }
 func (r *mutationResolver) UpdateItem(ctx context.Context, input NewItem) (*Item, error) {
-	log.Println("UpdateItem")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
@@ -291,7 +285,6 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input NewItem) (*Item
 	if !access {
 		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
 	}
-	log.Println("Access granted!")
 	query := "UPDATE  " + input.Table + "_items SET( name, amount, unit, section, checked, deleted, position, goal) = ($1, $2,$3,$4,$5,$6,$7,$8) WHERE item_id = '" + input.ID + "';"
 	log.Printf("UpdateItem, %+v\n", query)
 
@@ -308,7 +301,6 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input NewItem) (*Item
 	return &Item{ID: input.ID}, nil
 }
 func (r *mutationResolver) DeleteItem(ctx context.Context, input DeleteItem) (*Item, error) {
-	log.Println("DeleteItem")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
@@ -317,7 +309,6 @@ func (r *mutationResolver) DeleteItem(ctx context.Context, input DeleteItem) (*I
 	if !access {
 		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
 	}
-	log.Println("Access granted!")
 	query := "DELETE FROM " + input.Table + "_items WHERE item_id = '" + input.ID + "';"
 	log.Printf("DeleteItem, %+v\n", query)
 
@@ -333,7 +324,6 @@ func (r *mutationResolver) DeleteItem(ctx context.Context, input DeleteItem) (*I
 
 }
 func (r *mutationResolver) CreateSection(ctx context.Context, input *NewSection) (*Section, error) {
-	log.Println("CreateSection")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
@@ -342,7 +332,6 @@ func (r *mutationResolver) CreateSection(ctx context.Context, input *NewSection)
 	if !access {
 		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
 	}
-	log.Println("Access granted!")
 
 	query := "INSERT INTO " + input.Table + "_sections(section_id, name, position) VALUES($1,$2,$3) RETURNING id"
 	log.Printf("CreateSection, %+v\n", query)
@@ -359,7 +348,6 @@ func (r *mutationResolver) CreateSection(ctx context.Context, input *NewSection)
 	return &Section{ID: input.ID}, nil
 }
 func (r *mutationResolver) UpdateSection(ctx context.Context, input *NewSection) (*Section, error) {
-	log.Println("UpdateSection")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
@@ -368,7 +356,6 @@ func (r *mutationResolver) UpdateSection(ctx context.Context, input *NewSection)
 	if !access {
 		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
 	}
-	log.Println("Access granted!")
 	query := "UPDATE  " + input.Table + "_sections SET( name, position) = ($1, $2) WHERE section_id = '" + input.ID + "';"
 	log.Printf("UpdateSection, %+v\n", query)
 
@@ -383,7 +370,6 @@ func (r *mutationResolver) UpdateSection(ctx context.Context, input *NewSection)
 	return &Section{ID: input.ID}, nil
 }
 func (r *mutationResolver) DeleteSection(ctx context.Context, input DeleteSection) (*Section, error) {
-	log.Println("DeleteSection")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
@@ -392,7 +378,6 @@ func (r *mutationResolver) DeleteSection(ctx context.Context, input DeleteSectio
 	if !access {
 		log.Fatalf("Acess to table %s is not allowed for user %s", input.Table, user.UID)
 	}
-	log.Println("Access granted!")
 	query := "DELETE FROM " + input.Table + "_sections WHERE section_id = '" + input.ID + "';"
 	log.Printf("DeleteSection, %+v\n", query)
 
@@ -411,18 +396,16 @@ func (r *mutationResolver) DeleteSection(ctx context.Context, input DeleteSectio
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
-	log.Println("Query: Lists")
 	query := "CREATE TABLE lists(id SERIAL PRIMARY KEY, list_id VARCHAR(50) NOT NULL, list_name VARCHAR(50) NOT NULL, list_typ VARCHAR(50), user_uid VARCHAR(50), owner BOOLEAN);"
 	log.Printf("Lists, %+v\n", query)
-
 	r.DB.Query(query)
 
-	log.Println("In lists")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
 	query = "SELECT id, list_id, list_name, list_type, owner FROM lists WHERE user_uid = '" + user.UID + "';"
+	log.Printf("Lists, %+v\n", query)
 	rows, err := r.DB.Query(query)
 	defer rows.Close()
 	if err != nil {
@@ -436,16 +419,11 @@ func (r *queryResolver) Lists(ctx context.Context) ([]*List, error) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("0")
-
-		log.Printf("List from DB: %v\n", i)
 		ret = append(ret, &i)
 	}
 	return ret, nil
 }
 func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
-	log.Println("List")
-	// VERIFY ACCESS
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
@@ -466,9 +444,6 @@ func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("0")
-
-		log.Printf("List from DB: %v\n", list)
 		lists = append(lists, &list)
 	}
 	if len(lists) != 1 {
@@ -516,20 +491,17 @@ func (r *queryResolver) List(ctx context.Context, id string) (*List, error) {
 
 		items = append(items, item)
 	}
-	log.Println("Gotitems")
-	log.Printf("Name: %s, ID. %s , Sections: %v, Items: %v", lists[0].Name, id, sections, items)
+	//	log.Printf("Name: %s, ID. %s , Sections: %v, Items: %v", lists[0].Name, id, sections, items)
 	return &List{Name: lists[0].Name, ID: id, Sections: sections, Items: items}, nil
 
 }
 func (r *queryResolver) Suggestions(ctx context.Context, list string) ([]*Suggestion, error) {
-	log.Println("Suggestions")
 	user, ok := auth.FromContext(ctx)
 	if !ok {
 		log.Fatalf("No user in context\n")
 	}
 
 	listType := r.GetListType(list)
-
 	query := "SELECT * FROM _" + user.UID + "_" + listType + "_suggestions;"
 	log.Printf("Suggestions, %+v\n", query)
 
