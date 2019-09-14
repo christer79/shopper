@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import Select from "@material-ui/core/Select";
-import { Query } from "react-apollo";
+import { useQuery } from "@apollo/react-hooks";
 import { LISTS } from "./graphqlRequests";
 import Typography from "@material-ui/core/Typography";
 
@@ -57,44 +57,44 @@ function Menu(props) {
   function Loading() {
     return <Typography>Loading</Typography>;
   }
+
+  const { error, loading, data } = useQuery(LISTS);
+
+  if (error) return "Error loading lists...";
+  if (loading) return "Loading lists....";
+
   return (
     <Container>
       <button onClick={() => props.toggleShowEmptyLists()}>S/H</button>
       <Clipboarder />
 
       {props.listType === "pantry" ? (
-        <Query query={LISTS} errorPolicy="all">
-          {({ error, loading, data, ...result }) => {
-            if (error) return <Error error={error} />;
-            if (loading) return <Loading />;
-            return data.lists ? (
-              <Select
-                native
-                value="Select List To Add..."
-                onChange={pantryItemsToShoppingList}
-                inputProps={{
-                  name: "shoppingList",
-                  id: "age-native-simple"
-                }}
-              >
-                <option key="" value="">
-                  Select List to add Items
-                </option>
-                {data.lists
-                  .filter(list => list.listtype !== "pantry")
-                  .map(list => {
-                    return (
-                      <option key={list.id} value={list.id}>
-                        {list.name}
-                      </option>
-                    );
-                  })}
-              </Select>
-            ) : (
-              <span>No lists yet!</span>
-            );
-          }}
-        </Query>
+        data.lists ? (
+          <Select
+            native
+            value="Select List To Add..."
+            onChange={pantryItemsToShoppingList}
+            inputProps={{
+              name: "shoppingList",
+              id: "age-native-simple"
+            }}
+          >
+            <option key="" value="">
+              Select List to add Items
+            </option>
+            {data.lists
+              .filter(list => list.listtype !== "pantry")
+              .map(list => {
+                return (
+                  <option key={list.id} value={list.id}>
+                    {list.name}
+                  </option>
+                );
+              })}
+          </Select>
+        ) : (
+          <span>No lists yet!</span>
+        )
       ) : null}
     </Container>
   );
