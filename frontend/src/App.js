@@ -14,6 +14,7 @@ import NavBar from "./components/navBar";
 import * as firebase from "firebase";
 
 import { ApolloProvider } from "react-apollo";
+import { ApolloProvider as ApolloHooksProvider } from "@apollo/react-hooks";
 import ApolloClient from "apollo-client";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { split, concat, ApolloLink } from "apollo-link";
@@ -242,58 +243,60 @@ class App extends Component {
             }
           }}
         </FirebaseAuthConsumer>
-        <ApolloProvider client={this.client}>
-          <IfFirebaseAuthed>
-            {authState => {
-              if (this.props.token === "") {
-                return <div>Waiting for token</div>;
-              }
-              if (this.props.selectedList === "") {
+        <ApolloHooksProvider client={this.client}>
+          <ApolloProvider client={this.client}>
+            <IfFirebaseAuthed>
+              {authState => {
+                if (this.props.token === "") {
+                  return <div>Waiting for token</div>;
+                }
+                if (this.props.selectedList === "") {
+                  return (
+                    <div>
+                      <NavBar
+                        icon={<ListIcon />}
+                        page="Select list...."
+                        onBack={() => firebase.auth().signOut()}
+                        backIcon={<ExitToAppIcon />}
+                      />
+                      <ListSelector />
+                    </div>
+                  );
+                }
                 return (
                   <div>
+                    <EditItemForm />
+                    <AddFromPantryDialog />
+                    <Api client={this.client} key={this.props.selectedList} />
                     <NavBar
-                      icon={<ListIcon />}
-                      page="Select list...."
-                      onBack={() => firebase.auth().signOut()}
-                      backIcon={<ExitToAppIcon />}
+                      icon={
+                        this.props.lists.find(
+                          list => list.id === this.props.selectedList
+                        ).listtype === "shopping" ? (
+                          <ShoppingIcon />
+                        ) : (
+                          <KitchenIcon />
+                        )
+                      }
+                      backIcon={<ClearIcon />}
+                      page={
+                        this.props.lists.find(
+                          list => list.id === this.props.selectedList
+                        ).name
+                      }
+                      onBack={() => this.props.setListName("")}
                     />
-                    <ListSelector />
+                    <AddItemForm />
+                    <DragDropContext onDragEnd={this.onDragEnd}>
+                      <Lists />
+                    </DragDropContext>
+                    <Menu />
                   </div>
                 );
-              }
-              return (
-                <div>
-                  <EditItemForm />
-                  <AddFromPantryDialog />
-                  <Api client={this.client} key={this.props.selectedList} />
-                  <NavBar
-                    icon={
-                      this.props.lists.find(
-                        list => list.id === this.props.selectedList
-                      ).listtype === "shopping" ? (
-                        <ShoppingIcon />
-                      ) : (
-                        <KitchenIcon />
-                      )
-                    }
-                    backIcon={<ClearIcon />}
-                    page={
-                      this.props.lists.find(
-                        list => list.id === this.props.selectedList
-                      ).name
-                    }
-                    onBack={() => this.props.setListName("")}
-                  />
-                  <AddItemForm />
-                  <DragDropContext onDragEnd={this.onDragEnd}>
-                    <Lists />
-                  </DragDropContext>
-                  <Menu />
-                </div>
-              );
-            }}
-          </IfFirebaseAuthed>
-        </ApolloProvider>
+              }}
+            </IfFirebaseAuthed>
+          </ApolloProvider>
+        </ApolloHooksProvider>
       </div>
     );
   }
