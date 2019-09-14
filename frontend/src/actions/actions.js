@@ -8,6 +8,14 @@ const DELETE_ITEM = "DELETE_ITEM";
 const ADD_ITEM = "ADD_ITEM";
 const TOGGLE_SHOW_EMPTY_LISTS = "TOGGLE_SHOW_EMPTY_LISTS";
 
+export const SET_SECTION_CHECKED = "SET_SECTION_CHECKED";
+export function setSectionChecked(sectionID, checked) {
+  return {
+    type: SET_SECTION_CHECKED,
+    payload: { sectionID: sectionID, checked: checked }
+  };
+}
+
 export const SET_LISTS = "SET_LISTS";
 export function setLists(lists) {
   return {

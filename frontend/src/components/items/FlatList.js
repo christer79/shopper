@@ -1,7 +1,11 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Droppable } from "react-beautiful-dnd";
-import { deleteSection, deleteCheckedItems } from "../../actions/actions";
+import {
+  deleteSection,
+  deleteCheckedItems,
+  setSectionChecked
+} from "../../actions/actions";
 import { connect } from "react-redux";
 import Item from "./Item";
 import List from "@material-ui/core/List";
@@ -9,6 +13,7 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/DeleteForeverOutlined";
 import Tooltip from "@material-ui/core/Tooltip";
+import Checkbox from "@material-ui/core/Checkbox";
 
 function mapStateToProps(state) {
   return {
@@ -21,7 +26,8 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = {
   deleteSection,
-  deleteCheckedItems
+  deleteCheckedItems,
+  setSectionChecked
 };
 
 const useStyles = makeStyles(theme => ({
@@ -64,6 +70,7 @@ function FlatList(props) {
   const numberOfItems = nr => {
     return <span> - ({nr} items)</span>;
   };
+
   if (renderItems.length === 0 && !props.showEmptyLists) {
     return null;
   }
@@ -73,6 +80,14 @@ function FlatList(props) {
   if (props.id === "section-0" && props.showEmptyLists) {
     return null;
   }
+
+  var allItemsChecked =
+    props.listType !== "pantry"
+      ? !renderItems.some(item => item.checked === false)
+      : !renderItems.some(item => item.amount !== item.goal);
+
+  console.log("allItemsChecked", allItemsChecked);
+  console.log("renderItems", renderItems);
   return (
     <Droppable droppableId={props.id} type="ITEM">
       {provided => (
@@ -85,6 +100,16 @@ function FlatList(props) {
             className={classes.root}
             subheader={
               <ListSubheader component="div" id="nested-list-subheader">
+                <Checkbox
+                  className={classes.checkbox}
+                  edge="start"
+                  checked={allItemsChecked}
+                  tabIndex={-1}
+                  disableRipple
+                  onChange={() =>
+                    props.setSectionChecked(props.id, !allItemsChecked)
+                  }
+                />
                 {props.title}{" "}
                 {props.showEmptyLists
                   ? numberOfItems(renderItems.length)

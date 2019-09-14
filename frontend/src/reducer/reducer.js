@@ -1,4 +1,8 @@
-import { ADD_PANTRY_TO_SHOPPING_LIST, SET_LISTS } from "../actions/actions";
+import {
+  ADD_PANTRY_TO_SHOPPING_LIST,
+  SET_LISTS,
+  SET_SECTION_CHECKED
+} from "../actions/actions";
 
 const initialState = {
   token: "",
@@ -36,6 +40,38 @@ function reducer(state = initialState, action) {
   var newSections;
   var newItems;
   switch (action.type) {
+    case SET_SECTION_CHECKED:
+      console.log("state.selectedListType", state.selectedListType);
+      console.log("action.payload.checked", action.payload.checked);
+      newItems = [...state.items];
+      newItems.map(element => {
+        if (
+          element.section === action.payload.sectionID ||
+          (action.payload.sectionID === "checked-list" && element.checked)
+        ) {
+          if (state.selectedListType !== "pantry") {
+            if (element.checked !== action.payload.checked) {
+              element.synced = false;
+
+              element.checked = action.payload.checked;
+            }
+          } else {
+            console.log("START", element.name);
+            console.log("element.amount", element.amount);
+            console.log("element.goal", element.goal);
+            const amountBefore = element.amount;
+            element.amount = action.payload.checked ? element.goal : 0;
+            element.synced = amountBefore !== element.amount;
+
+            console.log("element.amount", element.amount);
+            console.log("END", element.name);
+          }
+        }
+        return element;
+      });
+      return Object.assign({}, state, {
+        items: newItems
+      });
     case SET_LISTS:
       return Object.assign({}, state, {
         lists: action.payload.lists
