@@ -2,6 +2,8 @@
 
 ## Deploy to heroku
 
+    git push heroku master
+
 ## BACKEND
 
 Generated with golang gqlgen script from schema.
