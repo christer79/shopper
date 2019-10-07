@@ -14,11 +14,11 @@ Cleanup:
 
 Build:
 
-    docker build -t custom_postgres.
+    docker build -t custom_postgres .
 
 Start:
 
-    docker run --rm --name pg-docker -e POSTGRES_DB=shopping -e POSTGRES_PASSWORD=docker -d -p 5432:5432 -v \$HOME/docker/volumes/postgres:/var/lib/postgresql/data custom_postgres
+    docker run --rm --name pg-docker -e POSTGRES_DB=shopping -e POSTGRES_PASSWORD=docker -d -p 5432:5432 -v /home/chreri/docker/volumes/postgres:/var/lib/postgresql/data custom_postgres
 
 Inspect:
 
