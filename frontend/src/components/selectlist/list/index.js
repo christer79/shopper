@@ -5,12 +5,11 @@ import { useMutation } from "@apollo/react-hooks";
 
 import Card from "@material-ui/core/Card";
 import { CardActions, CardContent } from "@material-ui/core";
-import DeleteIcon from "@material-ui/icons/DeleteForeverOutlined";
 import ShoppingIcon from "@material-ui/icons/ShoppingCartOutlined";
 import KitchenIcon from "@material-ui/icons/KitchenOutlined";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-
+import DeleteButton from "../../DeleteButton";
 import { DELETE_LIST, LISTS } from "../../../graphqlRequests";
 
 const mapDispatchToProps = {
@@ -31,7 +30,9 @@ function List(props) {
       </CardContent>
       <CardActions>
         <Button onClick={() => setListName(id, type)}>Open</Button>
-        <Button
+        <DeleteButton
+          confirmTitle="Really delete list?"
+          confirmQuestion="Deleted lists are not possible to recover!"
           onClick={e => {
             deleteList({
               variables: {
@@ -44,9 +45,7 @@ function List(props) {
               ]
             });
           }}
-        >
-          <DeleteIcon />
-        </Button>
+        />
       </CardActions>
     </Card>
   );

@@ -26,8 +26,8 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
-import DeleteIcon from "@material-ui/icons/DeleteForeverOutlined";
-
+import Tooltip from "@material-ui/core/Tooltip";
+import DeleteButton from "../DeleteButton";
 function mapStateToProps(state) {
   return {
     editItemModalShowing: state.editItemModal.Showing,
@@ -204,9 +204,14 @@ function EditItemForm(props) {
         )}
       </DialogContent>
       <DialogActions>
-        <Button type="button" onClick={handleDelete}>
-          <DeleteIcon />
-        </Button>
+        <Tooltip title="Delete item" aria-label="add">
+          <DeleteButton
+            confirmTitle="Really delete item?"
+            confirmQuestion="Deleted items are not possible to recover!"
+            onClick={handleDelete}
+          />
+        </Tooltip>
+
         <Button type="button" onClick={clearForm}>
           <ClearIcon />
         </Button>

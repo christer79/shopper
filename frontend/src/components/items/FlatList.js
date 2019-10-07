@@ -10,11 +10,9 @@ import { connect } from "react-redux";
 import Item from "./Item";
 import List from "@material-ui/core/List";
 import ListSubheader from "@material-ui/core/ListSubheader";
-import Button from "@material-ui/core/Button";
-import DeleteIcon from "@material-ui/icons/DeleteForeverOutlined";
 import Tooltip from "@material-ui/core/Tooltip";
 import Checkbox from "@material-ui/core/Checkbox";
-
+import DeleteButton from "../DeleteButton";
 function mapStateToProps(state) {
   return {
     items: state.items,
@@ -116,16 +114,20 @@ function FlatList(props) {
                   : null}
                 {props.showDeleteButton & !props.showEmptyLists ? (
                   <Tooltip title="Delete checked items" aria-label="add">
-                    <Button onClick={() => props.deleteCheckedItems()}>
-                      <DeleteIcon />
-                    </Button>
+                    <DeleteButton
+                      confirmTitle="Really delete checked items?"
+                      confirmQuestion="Deleted items are not possible to recover!"
+                      onClick={() => props.deleteCheckedItems()}
+                    />
                   </Tooltip>
                 ) : null}
                 {props.showEmptyLists ? (
-                  <Tooltip title="Delete section" aria-label="add">
-                    <Button onClick={() => props.deleteSection(props.id)}>
-                      <DeleteIcon />
-                    </Button>
+                  <Tooltip title="Delete items from section" aria-label="add">
+                    <DeleteButton
+                      confirmTitle="Really delete items from the section?"
+                      confirmQuestion="Deleted items are not possible to recover!"
+                      onClick={() => props.deleteCheckedItems()}
+                    />
                   </Tooltip>
                 ) : null}
               </ListSubheader>
