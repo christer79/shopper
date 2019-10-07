@@ -3,7 +3,6 @@ import styled from "styled-components";
 import Select from "@material-ui/core/Select";
 import { useQuery } from "@apollo/react-hooks";
 import { LISTS } from "./graphqlRequests";
-import Typography from "@material-ui/core/Typography";
 
 import {
   deleteCheckedItems,
@@ -49,14 +48,6 @@ function Menu(props) {
     //TODO: Add items from pantry to cachez
     props.setListName(event.target.value);
   };
-
-  function Error(props) {
-    return <Typography>Error loading: + {props.error}</Typography>;
-  }
-
-  function Loading() {
-    return <Typography>Loading</Typography>;
-  }
 
   const { error, loading, data } = useQuery(LISTS);
 

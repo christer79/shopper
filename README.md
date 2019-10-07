@@ -1,5 +1,7 @@
 # SHOPPER
 
+## Deploy to heroku
+
 ## BACKEND
 
 Generated with golang gqlgen script from schema.

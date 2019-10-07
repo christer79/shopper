@@ -6,21 +6,12 @@ import { connect } from "react-redux";
 import List from "../list";
 
 import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
 
 import { LISTS } from "../../../graphqlRequests";
 
 const mapDispatchToProps = {
   setLists
 };
-
-function Error(props) {
-  return <Typography>Error loading: </Typography>;
-}
-
-function Loading() {
-  return <Typography>Loading</Typography>;
-}
 
 function ListsList(props) {
   const { error, loading, data } = useQuery(LISTS);
