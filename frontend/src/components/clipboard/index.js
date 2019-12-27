@@ -55,7 +55,7 @@ function Clipboarder(props) {
           return item.section === section.id;
         });
         if (items_in_section.length > 0) {
-          text = text + section.name + "\n";
+          text = text + "\n" + section.name + "\n";
           text =
             text +
             items_in_section
