@@ -13,8 +13,14 @@ const mapDispatchToProps = {
   addItem
 };
 
+const sortFunction = function(a, b) {
+  if (a.position < b.position) return -1;
+  if (a.position > b.position) return +1;
+  return 0;
+};
+
 function Clipboarder(props) {
-  const { addItem, items } = props;
+  const { addItem } = props;
 
   React.useEffect(() => {
     document.addEventListener("paste", async event => {
@@ -34,14 +40,35 @@ function Clipboarder(props) {
   };
 
   const generateText = () => {
-    const text = items
-      .map(item => {
-        return item.amount === 0
-          ? item.name
-          : item.name + " " + item.amount + " " + item.unit;
+    const sections_with_items = props.sections.filter(section => {
+      return (
+        props.items.filter(item => {
+          return item.section === section.id;
+        }).length !== 0
+      );
+    });
+    return sections_with_items
+      .sort(sortFunction)
+      .map((section, index) => {
+        var text = "";
+        let items_in_section = props.items.filter(item => {
+          return item.section === section.id;
+        });
+        if (items_in_section.length > 0) {
+          text = text + section.name + "\n";
+          text =
+            text +
+            items_in_section
+              .map(item => {
+                return item.amount === 1
+                  ? " " + item.name
+                  : " " + item.name + " " + item.amount + " " + item.unit;
+              })
+              .join("\n");
+        }
+        return text;
       })
       .join("\n");
-    return text;
   };
 
   return (
@@ -57,7 +84,4 @@ function Clipboarder(props) {
   );
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Clipboarder);
+export default connect(mapStateToProps, mapDispatchToProps)(Clipboarder);
