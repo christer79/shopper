@@ -8,8 +8,12 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - $HOME/docker/volumes/postgres:/var/lib/postgresql/data postgres
+      - type: bind
+        source: ./postgres/init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+      - type: bind
+        source: /home/chreri/docker/volumes/postgres
+        target: /var/lib/postgresql/data
   web:
     build: .
     ports:
