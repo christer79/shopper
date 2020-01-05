@@ -5,13 +5,10 @@ import AddItemForm from "./AddItemForm";
 import Menu from "./Menu";
 import EditItemForm from "./components/items/EditItemForm";
 import AddFromPantryDialog from "./components/AddFromPantryDialog";
-import NavBar from "./components/navBar";
+import Api from "./Api";
+import ListSelector from "./components/selectlist/listselector";
 
 import { DragDropContext } from "react-beautiful-dnd";
-
-import ShoppingIcon from "@material-ui/icons/ShoppingCartOutlined";
-import KitchenIcon from "@material-ui/icons/KitchenOutlined";
-import ClearIcon from "@material-ui/icons/ClearOutlined";
 
 import { connect } from "react-redux";
 
@@ -150,29 +147,21 @@ function Shopper(props) {
 
     props.setItems(_items);
   };
-
+  if (props.selectedList === "") {
+    return <ListSelector />;
+  }
   return (
     <div>
-      <EditItemForm />
-      <AddFromPantryDialog />
-      <NavBar
-        icon={
-          props.lists.find(list => list.id === props.selectedList).listtype ===
-          "shopping" ? (
-            <ShoppingIcon />
-          ) : (
-            <KitchenIcon />
-          )
-        }
-        backIcon={<ClearIcon />}
-        page={props.lists.find(list => list.id === props.selectedList).name}
-        onBack={() => props.setListName("")}
-      />
-      <AddItemForm />
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Lists />
-      </DragDropContext>
-      <Menu />
+      <Api client={props.client} key={props.selectedList} />
+      <div>
+        <EditItemForm />
+        <AddFromPantryDialog />
+        <AddItemForm />
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Lists />
+        </DragDropContext>
+        <Menu />
+      </div>
     </div>
   );
 }

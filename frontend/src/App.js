@@ -1,9 +1,6 @@
 import React, { Component } from "react";
-
-import Api from "./Api";
 import SignInScreen from "./components/firebasesignin";
-import ListSelector from "./components/selectlist/listselector";
-import NavBar from "./components/navBar";
+
 import * as firebase from "firebase";
 
 import { ApolloProvider } from "react-apollo";
@@ -15,11 +12,8 @@ import { HttpLink } from "apollo-link-http";
 import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
 
-import ListIcon from "@material-ui/icons/ListAlt";
-import ExitToAppIcon from "@material-ui/icons/ExitToAppOutlined";
 import { FirebaseAuthConsumer, IfFirebaseAuthed } from "@react-firebase/auth";
-import Shopper from "./Shopper";
-
+import AppTabs from "./Tabs";
 import { setToken } from "./actions/actions";
 import { connect } from "react-redux";
 
@@ -119,25 +113,7 @@ class App extends Component {
                 if (this.props.token === "") {
                   return <div>Waiting for token</div>;
                 }
-                if (this.props.selectedList === "") {
-                  return (
-                    <div>
-                      <NavBar
-                        icon={<ListIcon />}
-                        page="Select list...."
-                        onBack={() => firebase.auth().signOut()}
-                        backIcon={<ExitToAppIcon />}
-                      />
-                      <ListSelector />
-                    </div>
-                  );
-                }
-                return (
-                  <div>
-                    <Api client={this.client} key={this.props.selectedList} />
-                    <Shopper />
-                  </div>
-                );
+                return <AppTabs client={this.client} />;
               }}
             </IfFirebaseAuthed>
           </ApolloProvider>
