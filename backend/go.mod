@@ -14,3 +14,5 @@ require (
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092
 	google.golang.org/api v0.5.0
 )
+
+go 1.13
