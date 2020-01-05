@@ -6,3 +6,5 @@ main
 v1_dump.sql
 v2_dump.sql
 .vscode/settings.json
+*.dump
+settings.json
