@@ -37,6 +37,7 @@ const persistedReducer = persistReducer(persistConfig, reducer);
 const store = createStore(persistedReducer, devToolsEnhancer());
 
 const persistor = persistStore(store);
+
 persistor.purge();
 
 const theme = createMuiTheme({
