@@ -5,8 +5,11 @@ import AddItemForm from "./AddItemForm";
 import Menu from "./Menu";
 import EditItemForm from "./components/items/EditItemForm";
 import AddFromPantryDialog from "./components/AddFromPantryDialog";
-import Api from "./Api";
 import ListSelector from "./components/selectlist/listselector";
+
+import IconButton from "@material-ui/core/IconButton";
+
+import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 
 import { DragDropContext } from "react-beautiful-dnd";
 
@@ -19,6 +22,7 @@ import {
   setToken,
   setListName
 } from "./actions/actions";
+import { Toolbar } from "@material-ui/core";
 
 function mapStateToProps(state) {
   return {
@@ -152,11 +156,20 @@ function Shopper(props) {
   }
   return (
     <div>
-      <Api client={props.client} key={props.selectedList} />
       <div>
         <EditItemForm />
         <AddFromPantryDialog />
-        <AddItemForm />
+        <Toolbar>
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={() => [props.setListName("")]}
+            aria-label="delete"
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+          <AddItemForm />
+        </Toolbar>
         <DragDropContext onDragEnd={onDragEnd}>
           <Lists />
         </DragDropContext>

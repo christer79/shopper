@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { addItem, addSection } from "./actions/actions";
 import CreatableSelect from "react-select/lib/Creatable";
+import { makeStyles } from "@material-ui/core/styles";
 
 const mapDispatchToProps = {
   addItem,
@@ -15,7 +16,19 @@ function mapStateToProps(state) {
   };
 }
 
+const useStyles = makeStyles(theme => ({
+  grow: {
+    flexGrow: 1
+  },
+  inputInput: {
+    padding: theme.spacing(1, 1, 1, 7),
+    flex: 1
+  }
+}));
+
 function AddItemForm(props) {
+  const classes = useStyles();
+
   const [name, setName] = React.useState(null);
 
   const handleItemChange = event => {
@@ -77,11 +90,9 @@ function AddItemForm(props) {
       value={name}
       onChange={handleItemChange}
       options={itemOptions}
+      className={classes.inputInput}
     />
   );
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AddItemForm);
+export default connect(mapStateToProps, mapDispatchToProps)(AddItemForm);

@@ -11,6 +11,7 @@ import IconButton from "@material-ui/core/IconButton";
 import ExitToAppIcon from "@material-ui/icons/ExitToAppOutlined";
 import * as firebase from "firebase";
 import { Toolbar } from "@material-ui/core";
+import Api from "./Api";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -59,6 +60,8 @@ export default function AppTabs(props) {
 
   return (
     <div className={classes.root}>
+      <Api client={props.client} />
+
       <AppBar position="static">
         <Toolbar>
           <Tabs
