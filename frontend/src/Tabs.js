@@ -7,6 +7,7 @@ import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import Shopper from "./Shopper";
+import Recipes from "./Recipes";
 import IconButton from "@material-ui/core/IconButton";
 import ExitToAppIcon from "@material-ui/icons/ExitToAppOutlined";
 import * as firebase from "firebase";
@@ -86,7 +87,7 @@ export default function AppTabs(props) {
         <Shopper client={props.client} />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        Recipies
+        <Recipes />
       </TabPanel>
     </div>
   );
