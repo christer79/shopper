@@ -48,7 +48,6 @@ export default function Recipe(props) {
   const editRecipe = id => {
     console.log("Would edit: ", id);
   };
-  console.log(images.length);
 
   return (
     <Card>
